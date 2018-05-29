@@ -32,8 +32,9 @@
     }
   },
   "variables": {
-    "publisher": "mathworks-deployment",
-    "imageName": "matlab-base-image",
+    "publisher": "mathworks-inc",
+    "offer": "matlab-ref-arch-18a-v1-linux-disk",
+    "sku": "matlab-ref-arch-18a-v1-linux-disk-offer-sku",
     "prefix": "matlab",
     "location": "[resourceGroup().location]",
     "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
@@ -44,10 +45,9 @@
     "vmName": "[concat(variables('prefix'),  '-vm')]",
     "hostName": "matlabvm",
     "sshKeyPath": "[concat('/home/',parameters('userName'),'/.ssh/authorized_keys')]",
-    "baseImageUri": "https://packerdemovmstorage.blob.core.windows.net/system/Microsoft.Compute/Images/images/matlab-R2018a-osDisk.3c133332-03ca-43c8-be25-b646f2e021c4.vhd",
     "providerID": "731B8048-AF19-4112-9B19-F5B9E7A961E8",
     "tagsForAll": {
-        "provider": "[variables('providerID')]"
+      "provider": "[variables('providerID')]"
     }
   },
   "resources": [
@@ -154,32 +154,18 @@
       }
     },
     {
-      "type": "Microsoft.Compute/images",
-      "apiVersion": "2016-04-30-preview",
-      "name": "[variables('imageName')]",
-      "location": "[variables('location')]",
-      "tags": "[variables('tagsForAll')]",
-      "properties": {
-        "storageProfile": {
-          "osDisk": {
-            "osType": "Linux",
-            "osState": "Generalized",
-            "blobUri": "[variables('baseImageUri')]",
-            "storageAccountType": "Standard_LRS"
-          }
-        }
-      }
-    },
-
-    {
       "apiVersion": "2017-03-30",
       "type": "Microsoft.Compute/virtualMachines",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "name": "[variables('vmName')]",
+      "plan": {
+        "name": "[variables('sku')]",
+        "publisher": "[variables('publisher')]",
+        "product": "[variables('offer')]"
+      },
       "dependsOn": [
-        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]",
-        "[variables('imageName')]"
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
       "properties": {
         "hardwareProfile": {
@@ -187,8 +173,18 @@
         },
         "storageProfile": {
           "imageReference": {
-            "id": "[resourceId('Microsoft.Compute/images', variables('imageName'))]"
-          }
+            "publisher": "[variables('publisher')]",
+            "offer": "[variables('offer')]",
+            "sku": "[variables('sku')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          },
+          "dataDisks": []
         },
         "osProfile": {
           "computerName": "[variables('hostName')]",
@@ -196,7 +192,7 @@
           "adminPassword": "[parameters('userPassword')]",
           "linuxConfiguration": {
             "disablePasswordAuthentication": false
-            }
+          }
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -213,20 +209,18 @@
       }
     },
     {
-        "name": "[concat('pid-', toLower(variables('providerID')))]",
-        "apiVersion": "2017-05-10",
-        "type": "Microsoft.Resources/deployments",
-        "properties": {
-            "mode": "Incremental",
-            "template": {
-                "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
-                "contentVersion": "1.0.0.0",
-                "resources": [ ]
-            }
+      "name": "[concat('pid-', toLower(variables('providerID')))]",
+      "apiVersion": "2017-05-10",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
         }
+      }
     }
   ],
-  "outputs": {
-    
-  }
+  "outputs": {}
 }
