@@ -3,7 +3,7 @@
 # Requirements
 Before starting, you will need the following:
 
-- A MATLAB® license. For more information, see [Configure MATLAB License in the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
+- A MATLAB® license. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
 - A [MathWorks Account](https://www.mathworks.com/login?uri=%2Fmwaccount%2F).
 - A Microsoft Azure account.
 
@@ -70,7 +70,7 @@ Agree to the Azure Marketplace terms and conditions and click **Purchase** to be
 
 ## Step 4. Launch MATLAB
 
-Double-click the MATLAB icon on the instance desktop to launch MATLAB. The first time you start MATLAB you will get a login dialog. Enter a valid MathWorks Account email address and password and click **Sign In**. If you have the correct license rights, MATLAB starts. For more information, see [Configure MATLAB License in the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
+Double-click the MATLAB icon on the instance desktop to launch MATLAB. The first time you start MATLAB you will get a login dialog. Enter a valid MathWorks Account email address and password and click **Sign In**. If you have the correct license rights, MATLAB starts. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
 
 >**Note**:It may take a few minutes for activation to complete and MATLAB to start. You will experience this delay only the first time you start MATLAB.
 
@@ -132,7 +132,7 @@ You can save a copy of your current virtual machine.  Locate the Azure VM in you
 You can customize an image by launching the reference architecture, applying any changes you want to the virtual machine such as installing additional software, drivers and files and then saving an image of that virtual machine using the Azure Portal. For more information, see [How do I save an image?](#how-do-i-save-an-image). When you launch the reference architecture, click “Edit Template”, replace the `baseImageUri` in the “variables” section with the URL from your custom image. Save and finish the deployment steps by filling out parameters, accepting the terms and clicking “Purchase”.
 
 ### How do I use a different license manager?
-The VM image uses MathWorks Hosted License Manager by default.  For information on using other license managers, see [Configure MATLAB License in the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html). 
+The VM image uses MathWorks Hosted License Manager by default.  For information on using other license managers, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html). 
 
 ### How do I deploy into an existing virtual network?
 You will need to edit the template and replace the appropriate sections with your own virtual network and subnet resource ids.
