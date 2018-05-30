@@ -21,7 +21,7 @@ file that defines the resources needed to run MATLAB on Azure. For information a
 Click the **Deploy to Azure** button to deploy MATLAB on
     Azure. This will open the Azure Portal in your web browser.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https://raw.githubusercontent.com/mathworks-ref-arch/matlab-on-azure/master/templates/azuredeploy.json" target="_blank">
+<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy.json" target="_blank">
     <img src="http://azuredeploy.net/deploybutton.png"/>
 </a>
 
