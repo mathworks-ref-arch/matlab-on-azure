@@ -21,13 +21,13 @@ file that defines the resources needed to run MATLAB on Azure. For information a
 Click the **Deploy to Azure** button to deploy MATLAB on
     Azure. This will open the Azure Portal in your web browser.
 
-<a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy.json" target="_blank">
-    <img src="http://azuredeploy.net/deploybutton.png"/>
-</a>
 
-> VM Platform: Ubuntu 16.04
+| Release | Ubuntu 16.04 VM |
+|---------------|------------------------|
+| MATLAB R2018b | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy-R2018b.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
 
-> MATLAB Release: R2018a
+For other releases, see [How do I launch a template that uses a previous MATLAB release?](#how-do-i-launch-a-template-that-uses-a-previous-matlab-release)
+
 
 
 ## Step 2. Configure Cloud Resources
@@ -116,6 +116,12 @@ A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM imag
 
 
 ## FAQ
+### How do I launch a template that uses a previous MATLAB release?
+
+| Release | Ubuntu 16.04 VM |
+|---------------|------------------------|
+| MATLAB R2018a | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
+
 
 ### How do I save my changes in the VM?
 All your files and changes are stored locally on the virtual machine.  They will persist until you either terminate the virtual machine instance or delete the resource group.  Stopping the instance does not destroy the data on the instance.  If you want your changes to persist before you terminate an instance you’ll need to:
