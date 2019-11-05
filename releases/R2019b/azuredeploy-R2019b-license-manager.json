@@ -1,0 +1,263 @@
+{
+    "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+    "contentVersion": "1.0.0.0",
+    "parameters": {
+        "vmSize": {
+            "type": "string",
+            "defaultValue": "Standard_D3_v2",
+            "metadata": {
+                "description": "Size of instance MATLAB VM"
+            }
+        },
+        "clientIPAddresses": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "String identifying the client CIDR or IP range which will be allowed to connect to this VM."
+            }
+        },
+        "userName": {
+            "type": "string",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Assign a default user name for this VM."
+            }
+        },
+        "userPassword": {
+            "type": "securestring",
+            "defaultValue": "",
+            "metadata": {
+                "description": "Password for user. Note this must meet Azure password requirements."
+            }
+        },
+        "licenseManagerHostName": {
+            "type": "string",
+            "defaultValue": "netlm-server",
+            "metadata": {
+                "description": "The hostname or ip address of the virtual machine hosting your network license manager for MATLAB. If deployed in a different virtual network, ensure that the hostname or address can be correctly resolved."
+            }
+        },
+        "licenseManagerPort": {
+            "type": "int",
+            "defaultValue": 27000,
+            "minValue": 0,
+            "maxValue": 65535 ,
+            "metadata": {
+                "description": "The port to use when connecting to your network license manager for MATLAB."
+            }
+        },
+        "virtualNetworkResourceID": {
+            "type": "string",
+            "metadata": {
+                "description": "The Resource ID of an existing virtual network to deploy your cluster into."
+            }
+        },
+        "subnetName": {
+            "type": "string",
+            "metadata": {
+                "description": "The name of an existing subnet within your virtual network to deploy your cluster into."
+            }
+        }
+    },
+    "variables": {
+        "publisher": "mathworks-inc",
+        "offer": "matlab-ref-arch-18a-v1-linux-disk",
+        "sku": "matlab-ref-arch-19b-vm-linux-sku",
+        "prefix": "matlab",
+        "location": "[resourceGroup().location]",
+        "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
+        "virtualNetworkName": "[concat(variables('prefix'), '-vnet')]",
+        "subnetId": "[concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName'))]",
+        "licenseString": "[concat(parameters('licenseManagerPort'), '@', string(parameters('licenseManagerHostName')))]",
+        "publicIp": "[concat(variables('prefix'), '-publicIP')]",
+        "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
+        "nicName": "[concat(variables('prefix'), '-nic')]",
+        "vmName": "[concat(variables('prefix'),  '-vm')]",
+        "hostName": "matlabvm",
+        "sshKeyPath": "[concat('/home/',parameters('userName'),'/.ssh/authorized_keys')]",
+        "providerID": "731B8048-AF19-4112-9B19-F5B9E7A961E8",
+        "tagsForAll": {
+            "provider": "[variables('providerID')]"
+        }
+    },
+    "resources": [
+        {
+            "name": "[variables('networkSecurityGroupName')]",
+            "type": "Microsoft.Network/networkSecurityGroups",
+            "apiVersion": "2017-03-01",
+            "location": "[variables('location')]",
+            "tags": "[variables('tagsForAll')]",
+            "properties": {
+                "securityRules": [
+                    {
+                        "name": "default-allow-ssh",
+                        "properties": {
+                            "priority": 1000,
+                            "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "22",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    },
+                    {
+                        "name": "default-allow-rdp",
+                        "properties": {
+                            "priority": 1001,
+                            "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+                            "protocol": "Tcp",
+                            "destinationPortRange": "3389",
+                            "access": "Allow",
+                            "direction": "Inbound",
+                            "sourcePortRange": "*",
+                            "destinationAddressPrefix": "*"
+                        }
+                    }
+                ]
+            }
+        },
+        {
+            "name": "[variables('publicIp')]",
+            "type": "Microsoft.Network/publicIPAddresses",
+            "apiVersion": "2017-03-01",
+            "location": "[variables('location')]",
+            "tags": "[variables('tagsForAll')]",
+            "properties": {
+                "publicIPAllocationMethod": "Static",
+                "dnsSettings": {
+                    "domainNameLabel": "[variables('domainNameLabel')]"
+                },
+                "idleTimeoutInMinutes": 20
+            }
+        },
+        {
+            "name": "[variables('nicName')]",
+            "type": "Microsoft.Network/networkInterfaces",
+            "apiVersion": "2017-03-01",
+            "location": "[variables('location')]",
+            "tags": "[variables('tagsForAll')]",
+            "dependsOn": [
+                "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIp'))]"
+            ],
+            "properties": {
+                "ipConfigurations": [
+                    {
+                        "name": "nic1IpConfig",
+                        "properties": {
+                            "subnet": {
+                                "id": "[variables('subnetId')]"
+                            },
+                            "privateIPAllocationMethod": "Dynamic",
+                            "publicIpAddress": {
+                                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIp'))]"
+                            }
+                        }
+                    }
+                ],
+                "networkSecurityGroup": {
+                    "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+                }
+            }
+        },
+        {
+            "apiVersion": "2017-03-30",
+            "type": "Microsoft.Compute/virtualMachines",
+            "location": "[variables('location')]",
+            "tags": "[variables('tagsForAll')]",
+            "name": "[variables('vmName')]",
+            "plan": {
+                "name": "[variables('sku')]",
+                "publisher": "[variables('publisher')]",
+                "product": "[variables('offer')]"
+            },
+            "dependsOn": [
+                "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            ],
+            "properties": {
+                "hardwareProfile": {
+                    "vmSize": "[parameters('vmSize')]"
+                },
+                "storageProfile": {
+                    "imageReference": {
+                        "publisher": "[variables('publisher')]",
+                        "offer": "[variables('offer')]",
+                        "sku": "[variables('sku')]",
+                        "version": "latest"
+                    },
+                    "osDisk": {
+                        "createOption": "FromImage",
+                        "managedDisk": {
+                            "storageAccountType": "Standard_LRS"
+                        }
+                    },
+                    "dataDisks": []
+                },
+                "osProfile": {
+                    "computerName": "[variables('hostName')]",
+                    "adminUsername": "[parameters('userName')]",
+                    "adminPassword": "[parameters('userPassword')]",
+                    "linuxConfiguration": {
+                        "disablePasswordAuthentication": false
+                    }
+                },
+                "networkProfile": {
+                    "networkInterfaces": [
+                        {
+                            "id": "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+                        }
+                    ]
+                },
+                "diagnosticsProfile": {
+                    "bootDiagnostics": {
+                        "enabled": false
+                    }
+                }
+            },
+            "resources": [
+                {
+                    "name": "config-app",
+                    "type": "extensions",
+                    "location": "[resourceGroup().location]",
+                    "apiVersion": "2017-03-30",
+                    "dependsOn": [
+                        "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+                    ],
+                    "tags": {
+                        "displayName": "config-app"
+                    },
+                    "properties": {
+                        "publisher": "Microsoft.Azure.Extensions",
+                        "type": "CustomScript",
+                        "typeHandlerVersion": "2.0",
+                        "autoUpgradeMinorVersion": true,
+                        "settings": {
+                            "skipDos2Unix": false
+                        },
+                        "protectedSettings": {
+                            "commandToExecute": "[concat('./license-manager.sh', ' ', variables('licenseString'))]",
+                            "fileUris": [
+                                "https://s3.amazonaws.com/mw-mdcs-cf/AzureScripts/license-manager.sh"
+                            ]
+                        }
+                    }
+                }
+            ]
+        },
+        {
+            "name": "[concat('pid-', toLower(variables('providerID')))]",
+            "apiVersion": "2017-05-10",
+            "type": "Microsoft.Resources/deployments",
+            "properties": {
+                "mode": "Incremental",
+                "template": {
+                    "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+                    "contentVersion": "1.0.0.0",
+                    "resources": []
+                }
+            }
+        }
+    ],
+    "outputs": {}
+}

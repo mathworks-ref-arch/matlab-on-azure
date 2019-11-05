@@ -16,14 +16,14 @@ The following guide will help you automate the process of running the MATLAB des
 file that defines the resources needed to run MATLAB on Azure. For information about the architecture of this solution, see [Architecture and Resources](#architecture-and-resources).
 
 # Choose a Deployment Option
-- [R2019b](releases/R2019b/README.md)
-- [R2019a and older](releases/R2019a_and_older/README.md)
+- [Deploy MATLAB on Azure using Online Licensing](online-licensing-instructions.md)
+- [Deploy MATLAB on Azure using Network Licensing](license-manager-instructions.md)
 
 # Architecture and Resources
 Deploying this reference architecture will create several resources in your
 resource group.
 
-![MATLAB on AWS Reference Architecture](images/azure-matlab-diagram.png)
+![MATLAB on AWS Reference Architecture](../../images/azure-matlab-diagram.png)
 
 Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources. 
 

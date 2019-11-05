@@ -1,9 +1,9 @@
-# MATLAB on Azure using a Network License Manager
+# MATLAB on Microsoft Azure using Online Licensing
 
 # Requirements
 Before starting, you will need the following:
 
-- A network license manager. <p>You can use the MathWorks provided reference architecture to deploy a network license manager on the cloud. For more information, see [Network License Manager for MATLAB on AWS](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-aws).</p>
+- A MATLAB� license. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
 - A [MathWorks Account](https://www.mathworks.com/login?uri=%2Fmwaccount%2F).
 - A Microsoft Azure account.
 
@@ -15,12 +15,11 @@ Click the **Deploy to Azure** button to deploy MATLAB on
     Azure. This will open the Azure Portal in your web browser.
 
 
-| Release | Ubuntu 16.04 VM |
-|---------------|------------------------|
-| MATLAB R2019a | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy-R2019a.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
-
-For other releases, see [How do I launch a template that uses a previous MATLAB release?](#how-do-i-launch-a-template-that-uses-a-previous-matlab-release)
-
+| Release | OS | Launch |
+|---------------|------------------------|----------|
+| MATLAB R2019a | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy-R2019a.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
+| MATLAB R2018b | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2019a_and_older%2Fazuredeploy-R2018b.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
+| MATLAB R2018a | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2019a_and_older%2Fazuredeploy.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
 
 
 ## Step 2. Configure Cloud Resources
@@ -34,11 +33,7 @@ Provide values for parameters in the custom deployment template on the Azure Por
 | **VM Size**                 | Specify the size of the VM you plan on using for deployment. Use [MATLAB system requirements](https://www.mathworks.com/support/sysreq.html) as a guide in choosing the appropriate VM size. The template defaults to: *Standard_D3_v2*. This configuration has 4 vCPUs and 14 GiB of Memory. For more information, see Azure [documentation](https://docs.microsoft.com/en-us/azure/virtual-machines/windows/sizes-general). <p><em>Example:</em> Standard_D3_v2</p> |
 | **Client IP Addresses**     | This is the IP address range that will be allowed to connect to this instance using the Remote Desktop Protocol. The format for this field is IP Address/Mask. <p><em>Example</em>: </p>10.0.0.1/32 <ul><li>This is the public IP address which can be found by searching for "what is my ip address" on the web. The mask determines the number of IP addresses to include.</li><li>A mask of 32 is a single IP address.</li><li>Use a [CIDR calculator](https://www.ipaddressguide.com/cidr) if you need a range of more than one IP addresses.</li><li>You may need to contact your IT administrator to determine which address is appropriate.</li></ul></p> |
 | **User Name**               | Enter a username you would like to use to connect to the virtual machine in the cloud using remote desktop.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 |
-| **User Password**           | Enter a password you would like to use to connect to the virtual machine in the cloud using remote desktop.       |
-| **License Manager Host Name**                   | The hostname or ip address of the virtual machine hosting your network license manager. If deployed in a different virtual network, ensure that the hostname or address can be correctly resolved. |
-| **License Manager Port**                        | The port to use when connecting to your network license manager. |
-| **Virtual Network Resource ID**                 | The Resource ID of an existing virtual network to deploy your cluster into. You can find this under the Properties of your virtual network. |
-| **Subnet Name**                                 | The name of an existing subnet within your virtual network to deploy your cluster into. |                                                                                                                                                                                                                                                                                                                                                                                                                                                                           
+| **User Password**           | Enter a password you would like to use to connect to the virtual machine in the cloud using remote desktop.                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
 
 <br />
 
@@ -67,9 +62,9 @@ Agree to the Azure Marketplace terms and conditions and click **Purchase** to be
 
 ## Step 4. Launch MATLAB
 
-Double-click the MATLAB icon on the instance desktop to launch MATLAB. If you have the correct license rights, MATLAB starts. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
+Double-click the MATLAB icon on the instance desktop to launch MATLAB. The first time you start MATLAB you will get a login dialog. Enter a valid MathWorks Account email address and password and click **Sign In**. If you have the correct license rights, MATLAB starts. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
 
->**Note**:It may take a few minutes for MATLAB to start. You will experience this delay only the first time you start MATLAB.
+>**Note**:It may take a few minutes for activation to complete and MATLAB to start. You will experience this delay only the first time you start MATLAB.
 
 
 # Additional Information
@@ -86,13 +81,6 @@ are done with them. Note that there is no undo.
     deletion.
 
 ## FAQ
-### How do I launch a template that uses a previous MATLAB release?
-
-| Release | Ubuntu 16.04 VM |
-|---------------|------------------------|
-| MATLAB R2018b | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy-R2018b.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
-| MATLAB R2018a | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
-
 
 ### How do I save my changes in the VM?
 All your files and changes are stored locally on the virtual machine.  They will persist until you either terminate the virtual machine instance or delete the resource group.  Stopping the instance does not destroy the data on the instance.  If you want your changes to persist before you terminate an instance you’ll need to:
@@ -119,4 +107,3 @@ Provide suggestions for additional features or capabilities using the following 
 
 # Technical Support
 Email: `cloud-support@mathworks.com`
-
