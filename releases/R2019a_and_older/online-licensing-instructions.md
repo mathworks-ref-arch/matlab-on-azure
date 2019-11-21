@@ -17,7 +17,7 @@ Click the **Deploy to Azure** button to deploy MATLAB on
 
 | Release | OS | Launch |
 |---------------|------------------------|----------|
-| MATLAB R2019a | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Ftemplates%2Fazuredeploy-R2019a.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
+| MATLAB R2019a | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2019a_and_older%2Fazuredeploy-R2019a.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
 | MATLAB R2018b | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2019a_and_older%2Fazuredeploy-R2018b.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
 | MATLAB R2018a | Ubuntu 16.04 | <a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2019a_and_older%2Fazuredeploy.json" target="_blank"> <img src="http://azuredeploy.net/deploybutton.png"/> </a>  |
 
