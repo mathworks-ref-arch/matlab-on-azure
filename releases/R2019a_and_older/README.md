@@ -23,7 +23,7 @@ file that defines the resources needed to run MATLAB on Azure. For information a
 Deploying this reference architecture will create several resources in your
 resource group.
 
-![MATLAB on AWS Reference Architecture](../../images/azure-matlab-diagram.png)
+![MATLAB on AWS Reference Architecture](../../img/azure-matlab-diagram.png)
 
 Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources. 
 
