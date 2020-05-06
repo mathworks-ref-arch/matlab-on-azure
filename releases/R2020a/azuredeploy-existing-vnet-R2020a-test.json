@@ -278,10 +278,7 @@
                             "skipDos2Unix": false
                         },
                         "protectedSettings": {
-                            "commandToExecute": "[concat('./license-manager.sh', ' ', variables('licenseServer'))]",
-                            "fileUris": [
-                                "https://s3.amazonaws.com/mw-mdcs-cf/AzureScripts/license-manager.sh"
-                            ]
+                            "commandToExecute": "[concat('sed -i -e \"s/\r$//\" /usr/local/matlab/license-manager.sh && /usr/local/matlab/license-manager.sh', ' ', variables('licenseServer'),' && sudo cp /usr/local/matlab/matlab.mlsettings', ' ', '/home/',parameters('AdminUsername'),'/.matlab/R2020a/matlab.mlsettings')]"
                         }
                     },
                     "condition": "[not(equals(variables('licenseServer'),'mhlm'))]"
@@ -306,9 +303,10 @@
                             "skipDos2Unix": false
                         },
                         "protectedSettings": {
-                            "commandToExecute": "[concat('curl -s \"https://s3.amazonaws.com/matlab-on-azure/matlab.mlsettings\" -o',' ', '/home/',parameters('AdminUsername'),'/.matlab/R2020a/matlab.mlsettings')]"
+                            "commandToExecute": "[concat('sudo cp /usr/local/matlab/matlab.mlsettings',' ', '/home/',parameters('AdminUsername'),'/.matlab/R2020a/matlab.mlsettings')]"
                         }
-                    }
+                    },
+                    "condition": "[equals(variables('licenseServer'),'mhlm')]"
                 }
             ]
         },
