@@ -22,6 +22,7 @@ Select a release to continue:
 
 | Release |
 | ------- |
+| [R2020b](releases/R2020b/README.md) |
 | [R2020a](releases/R2020a/README.md) |
 | [R2019b](releases/R2019b/README.md) |
 | [R2019a\_and\_older](releases/R2019a_and_older/README.md) |
@@ -37,7 +38,7 @@ Deploying this reference architecture sets up a single Azure virtual machine run
 
 A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM image contains the following software:
 * MATLAB, Simulink, Toolboxes, and support for GPUs.<p>To see a list of installed products, type `ver` at the MATLAB command prompt.</p>
-* Add-Ons: Deep Learning Toolbox Model for AlexNet Network, Deep Learning Toolbox Model for GoogLeNet Network, and Deep Learning Toolbox(TM) Model for ResNet-50 Network
+* Add-Ons: Deep Learning Toolbox(TM) Model for AlexNet Network, Deep Learning Toolbox Model for GoogLeNet Network, and Deep Learning Toolbox Model for ResNet-50 Network
 
 ### Resources
 
