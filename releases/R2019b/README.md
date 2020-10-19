@@ -25,10 +25,10 @@ resource group.
 
 ![MATLAB on AWS Reference Architecture](../../img/azure-matlab-diagram.png)
 
-Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources. 
+Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources.
 
 A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM image contains the following software:
-* MATLAB, Simulink, Toolboxes, and support for GPUs.<p>To see a list of installed products, type `ver` at the MATLAB command prompt.</p> 
+* MATLAB, Simulink, Toolboxes, and support for GPUs.<p>To see a list of installed products, type `ver` at the MATLAB command prompt.</p>
 * Add-Ons: Neural Network Toolbox Model for AlexNet Network, Neural Network Toolbox Model for GoogLeNet Network, and Neural Network Toolbox(TM) Model for ResNet-50 Network
 
 ### Resources
@@ -42,11 +42,5 @@ A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM imag
 | Virtual network                   | `matlab-vnet`           | 1                   | Enables resources to communicate with each other.                                          |
 | Disk                 | `matlab-vm-disk-<unique id>`            | 1                   | The disk attached to the VM.|
 | Image                 | `matlab-base-image`            | 1                   | The original image used to create the VM.|
-
-# Enhancement Request
-Provide suggestions for additional features or capabilities using the following link: https://www.mathworks.com/cloud/enhancement-request.html
-
-# Technical Support
-Email: `cloud-support@mathworks.com`
 
 
