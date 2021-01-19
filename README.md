@@ -20,9 +20,9 @@ The MATLAB Reference Architecture is released in lockstep with the bi-annual MAT
 Each reference architecture release has its own instructions as we continue to evolve it.
 Select a release to continue:
 
-| Release |
-| ------- |
-| [R2020b](releases/R2020b/README.md) |
+| Linux | Windows |
+| ------- | ------- |
+| [R2020b](releases/R2020b/README.md) | [R2020b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/blob/master/releases/R2020b/README.md) 
 | [R2020a](releases/R2020a/README.md) |
 | [R2019b](releases/R2019b/README.md) |
 | [R2019a\_and\_older](releases/R2019a_and_older/README.md) |
@@ -34,7 +34,7 @@ resource group.
 
 ![MATLAB on AWS Reference Architecture](img/azure-matlab-diagram.png)
 
-Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources.
+Deploying this reference architecture sets up a single Azure virtual machine running MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources.
 
 A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM image contains the following software:
 * MATLAB, Simulink, Toolboxes, and support for GPUs.<p>To see a list of installed products, type `ver` at the MATLAB command prompt.</p>
