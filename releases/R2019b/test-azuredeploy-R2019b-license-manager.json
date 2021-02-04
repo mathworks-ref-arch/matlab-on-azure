@@ -57,6 +57,24 @@
             "metadata": {
                 "description": "The name of an existing subnet within your virtual network to deploy your cluster into."
             }
+        },
+        "vmdisk1Uri": {
+            "type": "string",
+            "metadata": {
+                "description": "URI of the image to use"
+            }
+        },
+        "userImageStorageAccountResourceGroupName": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account resource group into which to put the VHD. Must be the same as the storage account resource group that contains vmdisk1Uri."
+            }
+        },
+        "userImageStorageAccountName": {
+            "type": "string",
+            "metadata": {
+                "description": "The storage account into which to put the VHD. Must be the same as the storage account that contains vmdisk1Uri."
+            }
         }
     },
     "variables": {
@@ -78,7 +96,20 @@
         "providerID": "731B8048-AF19-4112-9B19-F5B9E7A961E8",
         "tagsForAll": {
             "provider": "[variables('providerID')]"
-        }
+        },
+        "osDisk": {
+            "name": "[concat(variables('vmName'),'-osDisk')]",
+            "osType": "Linux",
+            "caching": "ReadOnly",
+            "createOption": "FromImage",
+            "image": {
+                "uri": "[parameters('vmdisk1Uri')]"
+            }
+        },
+        "storageProfileWithoutDataDisk": {
+            "osDisk": "[variables('osDisk')]"
+        },
+        "storageAccountApiVersion": "2018-07-01"
     },
     "resources": [
         {
@@ -167,11 +198,6 @@
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "name": "[variables('vmName')]",
-            "plan": {
-                "name": "[variables('sku')]",
-                "publisher": "[variables('publisher')]",
-                "product": "[variables('offer')]"
-            },
             "dependsOn": [
                 "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
             ],
@@ -180,19 +206,18 @@
                     "vmSize": "[parameters('vmSize')]"
                 },
                 "storageProfile": {
-                    "imageReference": {
-                        "publisher": "[variables('publisher')]",
-                        "offer": "[variables('offer')]",
-                        "sku": "[variables('sku')]",
-                        "version": "latest"
-                    },
                     "osDisk": {
+                        "name": "[concat(variables('vmName'),'-osDisk')]",
+                        "osType": "Linux",
+                        "caching": "ReadWrite",
                         "createOption": "FromImage",
-                        "managedDisk": {
-                            "storageAccountType": "Standard_LRS"
+                        "image": {
+                            "uri": "[parameters('vmdisk1Uri')]"
+                        },
+                        "vhd": {
+                            "uri": "[concat(reference(resourceId(parameters('userImageStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts/', parameters('userImageStorageAccountName')), variables('storageAccountApiVersion')).primaryEndpoints.blob, 'vhds/',variables('vmName'), uniquestring(resourceGroup().id), '-osDisk.vhd')]"
                         }
-                    },
-                    "dataDisks": []
+                    }
                 },
                 "osProfile": {
                     "computerName": "[variables('hostName')]",
