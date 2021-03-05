@@ -235,12 +235,12 @@
                         "settings": {
                             "skipDos2Unix": false
                         },
-                        "protectedSettings": {
-                            "commandToExecute": "[concat('./license-manager.sh', ' ', variables('licenseString'))]",
-                            "fileUris": [
-                                "https://s3.amazonaws.com/mw-mdcs-cf/AzureScripts/license-manager.sh"
-                            ]
-                        }
+                      "protectedSettings": {
+                        "commandToExecute": "[concat('./license-manager.sh', ' ', variables('licenseString'), '\n', 'sudo chmod 775 /home/', parameters('userName'), '/.matlab/R2019b/matlab.prf')]",
+                        "fileUris": [
+                          "https://s3.amazonaws.com/mw-mdcs-cf/AzureScripts/license-manager.sh"
+                        ]
+                      }
                     }
                 }
             ]
