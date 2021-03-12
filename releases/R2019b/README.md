@@ -27,7 +27,7 @@ resource group.
 
 Deploying this reference architecture sets up a single Azure virtual machine running Linux and MATLAB, a network interface with a public IP address to connect to the virtual machine, a network security group that controls network traffic, and a virtual network for communication between resources.
 
-A preconfigured Ubuntu 16.04 VM is provided to make deployment easy. The VM image contains the following software:
+A preconfigured Ubuntu 18.04 VM is provided to make deployment easy. The VM image contains the following software:
 * MATLAB, Simulink, Toolboxes, and support for GPUs.<p>To see a list of installed products, type `ver` at the MATLAB command prompt.</p>
 * Add-Ons: Neural Network Toolbox Model for AlexNet Network, Neural Network Toolbox Model for GoogLeNet Network, and Neural Network Toolbox(TM) Model for ResNet-50 Network
 

@@ -8,7 +8,7 @@ Click the **Deploy to Azure** button below to deploy the cloud resources on Azur
 | --- | --- |
 | Use this option to deploy the resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2020a%2Fazuredeploy-R2020a.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2020a%2Fazuredeploy-existing-vnet-R2020a.json" target="_blank"><img src="http://azuredeploy.net/deploybutton.png"/></a></br></br> |
 
-> VM Platform: Windows Server 2016
+> VM Platform: Ubuntu 18.04
 
 > MATLAB Release: R2020a
 
