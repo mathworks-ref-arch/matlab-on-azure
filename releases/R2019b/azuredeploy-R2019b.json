@@ -206,7 +206,33 @@
             "enabled": false
           }
         }
-      }
+      },
+      "resources": [
+        {
+          "name": "config-app",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2017-03-30",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "config-app"
+          },
+          "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "skipDos2Unix": false
+            },
+            "protectedSettings": {
+              "commandToExecute": "[concat('sudo chmod 775 /home/', parameters('userName'), '/.matlab/R2019b/matlab.prf')]"
+            }
+          }
+        }
+      ]
     },
     {
       "name": "[concat('pid-', toLower(variables('providerID')))]",
