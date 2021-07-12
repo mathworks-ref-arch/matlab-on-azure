@@ -62,7 +62,7 @@ Agree to the Azure Marketplace terms and conditions and click **Purchase** to be
 
 ## Step 4. Launch MATLAB
 
-Double-click the MATLAB icon on the instance desktop to launch MATLAB. The first time you start MATLAB you will get a login dialog. Enter a valid MathWorks Account email address and password and click **Sign In**. If you have the correct license rights, MATLAB starts. For more information, see [Configure MATLAB Licensing on the Cloud](http://www.mathworks.com/support/cloud/configure-matlab-licensing-on-the-cloud.html).
+Double-click the MATLAB icon on the instance desktop to launch MATLAB. The first time you start MATLAB, you should see a login dialog in the terminal. Enter a valid MathWorks account email address and password. Choose one of the listed licenses associated with your account (you only need to do this the first time you start MATLAB). For more information, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/licensingoncloud/matlab-on-the-cloud.html).
 
 >**Note**:It may take a few minutes for activation to complete and MATLAB to start. You will experience this delay only the first time you start MATLAB.
 
