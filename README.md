@@ -1,9 +1,9 @@
-# MATLAB on Microsoft Azure
+# MATLAB on Microsoft Azure (Linux VM)
 
 # Requirements
 Before starting, you will need the following:
 
-- A MATLAB® license. For more information, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/licensingoncloud/matlab-on-the-cloud.html).
+- A MATLAB® license. For more information, see [Confirm Licensing for MathWorks Products Running on the Cloud](https://mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html).
 - A [MathWorks Account](https://www.mathworks.com/login?uri=%2Fmwaccount%2F).
 - A Microsoft Azure account.
 
@@ -22,6 +22,7 @@ Select a release to continue:
 
 | Linux | Windows |
 | ------- | ------- |
+| [R2021b](releases/R2021b/README.md) | [R2021b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/blob/master/releases/R2021b/README.md)
 | [R2021a](releases/R2021a/README.md) | [R2021a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/blob/master/releases/R2021a/README.md)
 | [R2020b](releases/R2020b/README.md) | [R2020b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/blob/master/releases/R2020b/README.md)
 | [R2020a](releases/R2020a/README.md) |
@@ -71,7 +72,7 @@ You can save a copy of your current virtual machine.  Locate the Azure VM in you
 You can customize an image by launching the reference architecture, applying any changes you want to the virtual machine such as installing additional software, drivers and files and then saving an image of that virtual machine using the Azure Portal. For more information, see [How do I save an image?](#how-do-i-save-an-image). When you launch the reference architecture, click “Edit Template”, replace the `baseImageUri` in the “variables” section with the URL from your custom image. Save and finish the deployment steps by filling out parameters, accepting the terms and clicking “Create”.
 
 ### How do I use a different license manager?
-The VM image uses MathWorks Hosted License Manager by default.  For information on using other license managers, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/licensingoncloud/matlab-on-the-cloud.html).
+The VM image uses MathWorks Hosted License Manager by default.  For information on using other license managers, see [Confirm Licensing for MathWorks Products Running on the Cloud](https://mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html).
 
 ### How do I deploy into an existing virtual network?
 You will need to edit the template and replace the appropriate sections with your own virtual network and subnet resource ids.
