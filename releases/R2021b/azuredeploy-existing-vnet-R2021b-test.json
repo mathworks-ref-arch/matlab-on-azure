@@ -81,7 +81,7 @@
         "nicName": "[concat(variables('prefix'), '-nic')]",
         "vmName": "servermachine",
         "hostName": "matlabvm",
-        "providerID": "731B8048-AF19-4112-9B19-F5B9E7A961E8",
+        "providerID": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
         "tagsForAll": {
             "provider": "[variables('providerID')]"
         },
@@ -280,7 +280,7 @@
             ]
         },
         {
-            "name": "[concat('pid-', toLower(variables('providerID')))]",
+            "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
             "apiVersion": "2017-05-10",
             "type": "Microsoft.Resources/deployments",
             "properties": {
