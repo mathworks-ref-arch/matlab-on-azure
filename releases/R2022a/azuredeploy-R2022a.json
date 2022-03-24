@@ -1,0 +1,299 @@
+{
+  "$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "VmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "The Azure instance type to use for the VM. See https://docs.microsoft.com/en-us/azure/virtual-machines/sizes for a list of instance types."
+      }
+    },
+    "ClientIPAddresses": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value <your_public_ip_address>/32 to restrict access to only your computer."
+      }
+    },
+    "AdminPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Choose the password for the user \"ubuntu\" for the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for information on the password requirements."
+      }
+    },
+    "LicenseServer": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Optional License Manager for MATLAB string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets."
+      }
+    }
+  },
+  "variables": {
+    "prefix": "matlab",
+    "addressPrefix": "10.0.0.0/16",
+    "subnetPrefix": "10.0.0.0/24",
+    "AdminUsername": "ubuntu",
+    "newOrExistingVirtualNetwork": "New",
+    "virtualNetworkCreateName": "[concat(variables('prefix'), '-vnet')]",
+    "subnetCreateName": "[concat(variables('prefix'), '-subnet')]",
+    "virtualNetworkName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),last(split(parameters('VirtualNetworkResourceID'),'/')),variables('virtualNetworkCreateName'))]",
+    "SubnetName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),parameters('SubnetName'),variables('subnetCreateName'))]",
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('SubnetName'))]",
+    "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'New'),variables('subnetRef'),concat(parameters('VirtualNetworkResourceID'), '/subnets/', parameters('SubnetName')))]",
+    "location": "[resourceGroup().location]",
+    "licenseServer": "[if(equals(parameters('LicenseServer'),''),'mhlm',parameters('LicenseServer'))]",
+    "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
+    "publicIp": "[concat(variables('prefix'), '-publicIP')]",
+    "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
+    "nicName": "[concat(variables('prefix'), '-nic')]",
+    "vmName": "[concat(variables('prefix'),  '-vm')]",
+    "hostName": "matlabvm",
+    "providerID": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
+    "tagsForAll": {
+      "provider": "[variables('providerID')]"
+    },
+    "publisher": "mathworks-inc",
+    "offer": "matlab-ref-arch-18a-v1-linux-disk",
+    "sku": "matlab-ref-arch-r2022a-vm-linux-sku",
+    "version": "1.0.0",
+    "imageReference": {
+      "publisher": "[variables('publisher')]",
+      "offer": "[variables('offer')]",
+      "sku": "[variables('sku')]",
+      "version": "[variables('version')]"
+    },
+    "plan": {
+      "name": "[variables('sku')]",
+      "publisher": "[variables('publisher')]",
+      "product": "[variables('offer')]"
+    }
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2017-03-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[resourceGroup().location]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": [
+            "[variables('addressPrefix')]"
+          ]
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetCreateName')]",
+            "properties": {
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "condition": "[equals(variables('newOrExistingVirtualNetwork'),'New')]"
+    },
+    {
+      "name": "[variables('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2017-03-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "priority": 1000,
+              "sourceAddressPrefix": "[parameters('ClientIPAddresses')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "22",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1001,
+              "sourceAddressPrefix": "[parameters('ClientIPAddresses')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "3389",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIp')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "apiVersion": "2017-03-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('domainNameLabel')]"
+        },
+        "idleTimeoutInMinutes": 20
+      }
+    },
+    {
+      "name": "[variables('nicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2017-03-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "dependsOn": [
+        "[concat('Microsoft.Network/publicIpAddresses/', variables('publicIp'))]"
+      ],
+      "properties": {
+        "ipConfigurations": [
+          {
+            "name": "nic1IpConfig",
+            "properties": {
+              "subnet": {
+                "id": "[variables('subnetId')]"
+              },
+              "privateIPAllocationMethod": "Dynamic",
+              "publicIpAddress": {
+                "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIp'))]"
+              }
+            }
+          }
+        ],
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "apiVersion": "2017-03-30",
+      "type": "Microsoft.Compute/virtualMachines",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "name": "[variables('vmName')]",
+      "plan": {
+        "name": "[variables('sku')]",
+        "publisher": "[variables('publisher')]",
+        "product": "[variables('offer')]"
+      },
+      "dependsOn": [
+        "[concat('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "VmSize": "[parameters('VmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": {
+            "publisher": "[variables('publisher')]",
+            "offer": "[variables('offer')]",
+            "sku": "[variables('sku')]",
+            "version": "latest"
+          },
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          },
+          "dataDisks": []
+        },
+        "osProfile": {
+          "computerName": "[variables('hostName')]",
+          "AdminUsername": "[variables('AdminUsername')]",
+          "AdminPassword": "[parameters('AdminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": false
+          }
+        }
+      },
+      "resources": [
+        {
+          "name": "config-app",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2017-03-30",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "config-app"
+          },
+          "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "skipDos2Unix": false
+            },
+            "protectedSettings": {
+              "commandToExecute": "[concat('sed -i -e \"s/\r$//\" /usr/local/matlab/license-manager.sh && /usr/local/matlab/license-manager.sh', ' ', variables('licenseServer'))]"
+            }
+          },
+          "condition": "[not(equals(variables('licenseServer'),'mhlm'))]"
+        },
+        {
+          "name": "config-help-improve-matlab",
+          "type": "extensions",
+          "location": "[resourceGroup().location]",
+          "apiVersion": "2019-07-01",
+          "dependsOn": [
+            "[concat('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "config-help-improve-matlab"
+          },
+          "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.0",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "skipDos2Unix": false
+            },
+            "protectedSettings": {
+              "commandToExecute": "/usr/local/ddux.sh MATLAB:AZURE:V1"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
+      "apiVersion": "2017-05-10",
+      "type": "Microsoft.Resources/deployments",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    }
+  ],
+  "outputs": {}
+}

@@ -21,6 +21,7 @@ To view instructions for deploying the MATLAB reference architecture, select a M
 
 | Release |
 | ------- |
+| [R2022a](releases/R2022a/README.md) |
 | [R2021b](releases/R2021b/README.md) |
 | [R2021a](releases/R2021a/README.md) |
 | [R2020b](releases/R2020b/README.md) |
