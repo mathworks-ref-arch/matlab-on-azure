@@ -27,7 +27,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "Choose the password for the user \"ubuntu\" for the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for information on the password requirements."
+        "description": "Choose the password for the admin user of the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for information on the password requirements."
       }
     },
     "autoShutdown": {
@@ -67,7 +67,7 @@
     "enableNiceDcv": {
       "type": "string",
       "metadata": {
-        "description": "Select 'Yes' if you wish to start desktop using [NICE DCV](https://www.nice-dcv.com). This will configure NICE DCV using a 30-days demo license (unless a production license is provided). You can revert to using xRDP for remote connection to this VM using Azure run-command mentioned in (README link here). By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'No', NICE DCV will not be configured and you can connect to this VM using a RDP connection."
+        "description": "Select 'Yes' if you wish to start desktop using [NICE DCV](https://aws.amazon.com/hpc/dcv/). This will configure NICE DCV using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'No', NICE DCV will not be configured, and you can connect to this VM using a RDP connection."
       },
       "defaultValue": "No",
       "allowedValues": [
