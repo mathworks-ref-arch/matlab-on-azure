@@ -1,20 +1,35 @@
 # MATLAB on Microsoft Azure (Linux VM)
 
+## Prerequisites
+
+To deploy this reference architecture, you must have the following permissions that allow you to create and assign Azure roles in your subscription:
+
+1. `Microsoft.Authorization/roleDefinitions/write`
+2. `Microsoft.Authorization/roleAssignments/write`
+
+To check if you have these permissions for your Azure subscription, please follow the steps mentioned in [Check access for a user to Azure resources](https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access).
+
+If you do not have these permissions, you can obtain them in one of the two ways:
+
+1. The built-in Azure role [User Access Administrator](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator) contains the above-mentioned permissions. Administrators or Owners of the subscription can directly assign you this role in addition to your existing role. To assign roles using the Azure portal, see [Assign Azure roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
+
+2. The Azure account administrator or Owner can also create a custom role containing these permissions and attach it along with your existing role. To create custom roles using the Azure portal, see [Create Custom roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/custom-roles-portal).
+
+To get a list of Owners in your subscription, see [List Owners of a Subscription](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-list-portal#list-owners-of-a-subscription).
+
 ## Step 1. Launch the Template
 
 Click the **Deploy to Azure** button below to deploy the cloud resources on Azure. This will open the Azure Portal in your web browser.
 
 | Create Virtual Network | Use Existing Virtual Network |
 | --- | --- |
-| Use this option to deploy the resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-R2022b.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-existing-vnet-R2022b.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
+| Use this option to deploy the resources in a new virtual network<br><br><a href="{{ARTIFACTS_BASE_RAW}}azuredeploy-{{CURRENT_RELEASE}}.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="{{ARTIFACTS_BASE_RAW}}azuredeploy-existing-vnet-{{CURRENT_RELEASE}}.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
 
 > VM Platform: Ubuntu 20.04
   
-> MATLAB Release: R2022b
+> MATLAB Release: {{ CURRENT_RELEASE }}
 
 ## Step 2. Configure the Cloud Resources
-
->   **Note:** To deploy the resource group, you must have permissions to create Azure roles and assign them to resources in your subscription.
 
 Clicking the Deploy to Azure button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side.
 
@@ -22,17 +37,9 @@ Clicking the Deploy to Azure button opens the "Custom deployment" page in your b
 
 | Parameter label | Description |
 | --------------- | ----------- |
-| **Vm Size** | The Azure instance type to use for the VM. See https://docs.microsoft.com/en-us/azure/virtual-machines/sizes for a list of instance types. |
-| **Client IP Addresses** | The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value <your_public_ip_address>/32 to restrict access to only your computer. |
-| **Admin Username** | Admin username for the VM running MATLAB. To avoid any deployment errors, please check the list of [disallowed values](https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/create-or-update?tabs=HTTP#osprofile) for Admin Username. |
-| **Admin Password** | Choose the password for the admin user of the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for information on the password requirements. |
-| **Virtual Network Resource ID** | The Resource ID of an existing virtual network to deploy your VM into. You can find this under the Properties of your virtual network. Specify this parameter only when deploying with the Existing Virtual Network option. |
-| **Subnet Name** | The name of an existing subnet within your virtual network to deploy your VM into. Specify this parameter only when deploying with the Existing Virtual Network option. |
-| **Auto Shutdown** | Select the duration after which the VM should be automatically shut down post launch. |
-| **Enable Nice Dcv** | Select 'Yes' if you wish to start desktop using [NICE DCV](https://aws.amazon.com/hpc/dcv/). This will configure NICE DCV using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'No', NICE DCV will not be configured, and you can connect to this VM using a RDP connection. |
-| **Nice Dcv License Server** | If you have opted to enable NICE DCV and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted not to enable NICE DCV or want to use NICE DCV with a demo license. |
-| **Matlab License Server** | Optional License Manager for MATLAB string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. |
-
+{% for parameter in parameters -%}
+| **{{ parameter.label }}** | {{ parameter.description }} |
+{% endfor %}
 
 **NOTE**: If you are using network license manager, the port and hostname of the network license manager must be reachable from the MATLAB VMs. It is therefore recommended that you deploy into a subnet within the same virtual network as the network license manager.
 
