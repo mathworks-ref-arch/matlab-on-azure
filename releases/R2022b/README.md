@@ -14,7 +14,7 @@ Click the **Deploy to Azure** button below to deploy the cloud resources on Azur
 
 ## Step 2. Configure the Cloud Resources
 
->   **Note:** To deploy the resource group, you must have to permissions to create Azure roles and assign them to resources in your subscription.
+>   **Note:** To deploy the resource group, you must have permissions to create Azure roles and assign them to resources in your subscription.
 
 Clicking the Deploy to Azure button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side.
 
