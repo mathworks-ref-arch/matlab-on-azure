@@ -13,21 +13,21 @@
             "type": "string",
             "defaultValue": "",
             "metadata": {
-                "description": "The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value <your_public_ip_address>/32 to restrict access to only your computer."
+                "description": "The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value &lt;your_public_ip_address&gt;/32 to restrict access to only your computer."
             }
         },
         "adminUsername": {
             "type": "string",
             "defaultValue": "ubuntu",
             "metadata": {
-                "description": "Admin username for the VM running MATLAB. To avoid any deployment errors, please check the list of [disallowed values](https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/create-or-update?tabs=HTTP#osprofile) for Admin Username."
+                "description": "Admin username for the VM running MATLAB. To avoid any deployment errors, check the list of [disallowed values](https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/create-or-update?tabs=HTTP#osprofile) for Admin Username."
             }
         },
         "adminPassword": {
             "type": "securestring",
             "defaultValue": "",
             "metadata": {
-                "description": "Choose the password for the admin user of the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. See https://docs.microsoft.com/en-us/azure/virtual-machines/windows/faq#what-are-the-password-requirements-when-creating-a-vm- for information on the password requirements."
+                "description": "Choose the password for the admin user of the instance. This password is required when logging into the instance using remote desktop protocol. For the deployment to succeed, your password must meet Azure's password requirements. Check this [page](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)for information on the password requirements."
             }
         },
         "autoShutdown": {
@@ -138,8 +138,8 @@
         "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
         "runtimeStack": "powershell",
         "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
-        "repoUrl": "{{REPOURL}}",
-        "branch": "{{BRANCH}}",
+        "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure.git",
+        "branch": "master",
         "functionappDirectory": "function-apps/",
         "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
         "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
