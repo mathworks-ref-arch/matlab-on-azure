@@ -64,22 +64,22 @@
         "description": "Select the duration after which the VM should be automatically shut down post launch."
       }
     },
-    "enableNiceDcv": {
+    "accessProtocol": {
       "type": "string",
       "metadata": {
-        "description": "Select 'Yes' if you wish to start desktop using [NICE DCV](https://aws.amazon.com/hpc/dcv/). This will configure NICE DCV using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'No', NICE DCV will not be configured, and you can connect to this VM using a RDP connection."
+        "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' will configure [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be configured, and you can connect to this VM using a RDP connection."
       },
-      "defaultValue": "No",
+      "defaultValue": "RDP",
       "allowedValues": [
-        "No",
-        "Yes"
+        "RDP",
+        "NICE DCV"
       ]
     },
     "niceDcvLicenseServer": {
       "defaultValue": "",
       "type": "String",
       "metadata": {
-        "description": "If you have opted to enable NICE DCV and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted not to enable NICE DCV or want to use NICE DCV with a demo license."
+        "description": "If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license."
       }
     },
     "matlabLicenseServer": {
@@ -87,6 +87,13 @@
       "type": "String",
       "metadata": {
         "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. For more information, see https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure."
+      }
+    },
+    "optionalUserCommand": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e \"export CLOUD=AZURE\" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh \"https://example.com/script.sh\" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'."
       }
     }
   },
@@ -106,7 +113,8 @@
     "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'New'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
     "location": "[resourceGroup().location]",
     "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
-    "customCommandToRun": "[concat('sh /usr/local/bin/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', parameters('enableNiceDcv'), ' ', parameters('adminUsername'), ' ', parameters('niceDcvLicenseServer'))]",
+    "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
+    "customCommandToRun": "[concat('sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
     "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
     "publicIp": "[concat(variables('prefix'), '-publicIP')]",
     "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
@@ -135,8 +143,8 @@
     "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
     "runtimeStack": "powershell",
     "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
-    "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure",
-    "branch": "master",
+    "repoUrl": "{{REPOURL}}",
+    "branch": "{{BRANCH}}",
     "functionappDirectory": "function-apps/",
     "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
     "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
@@ -292,11 +300,12 @@
         },
         "osProfile": {
           "computerName": "[variables('hostName')]",
-          "AdminUsername": "[variables('AdminUsername')]",
-          "AdminPassword": "[parameters('adminPassword')]",
+          "adminUsername": "[variables('AdminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
           "linuxConfiguration": {
             "disablePasswordAuthentication": false
-          }
+          },
+          "customData": "[base64('#cloud-config\napt_update: true')]"
         },
         "networkProfile": {
           "networkInterfaces": [
@@ -490,7 +499,7 @@
   "outputs": {
     "NICE DCV Connection": {
       "type": "String",
-      "condition": "[equals(parameters('enableNiceDcv'), 'Yes')]",
+      "condition": "[equals(parameters('accessProtocol'), 'NICE DCV')]",
       "value": "[concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8443/#console')]"
     },
     "RDP Connection": {
