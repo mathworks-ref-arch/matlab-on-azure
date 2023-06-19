@@ -159,7 +159,7 @@
         "runtimeStack": "powershell",
         "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
         "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure.git",
-        "branch": "{{BRANCH}}",
+        "branch": "master",
         "functionappDirectory": "function-apps/",
         "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
         "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
