@@ -30,48 +30,16 @@
         "description": "Choose the password for the admin username. This password is required when logging in remotely to the instance. For the deployment to succeed, your password must meet [Azure's password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)."
       }
     },
-    "virtualNetworkResourceID": {
-      "type": "string",
-      "metadata": {
-        "description": "The Resource ID of an existing virtual network to deploy your VM into. You can find this under the Properties of your virtual network."
-      }
-    },
     "subnetName": {
       "type": "string",
+      "defaultValue": "default",
       "metadata": {
-        "description": "The name of an existing subnet within your virtual network to deploy your VM into."
+        "description": "Name of the subnet."
       }
     },
     "autoShutdown": {
       "defaultValue": "Never",
       "type": "string",
-      "allowedValues": [
-        "Never",
-        "After 1 hour",
-        "After 2 hours",
-        "After 3 hours",
-        "After 4 hours",
-        "After 5 hours",
-        "After 6 hours",
-        "After 7 hours",
-        "After 8 hours",
-        "After 9 hours",
-        "After 10 hours",
-        "After 11 hours",
-        "After 12 hours",
-        "After 13 hours",
-        "After 14 hours",
-        "After 15 hours",
-        "After 16 hours",
-        "After 17 hours",
-        "After 18 hours",
-        "After 19 hours",
-        "After 20 hours",
-        "After 21 hours",
-        "After 22 hours",
-        "After 23 hours",
-        "After 24 hours"
-      ],
       "metadata": {
         "description": "Select the duration after which the VM should be automatically shut down post launch."
       }
@@ -107,31 +75,138 @@
       "metadata": {
         "description": "Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e \"export CLOUD=AZURE\" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh \"https://example.com/script.sh\" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'."
       }
+    },
+    "location": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().location]",
+      "metadata": {
+        "description": "Location for the resources."
+      }
+    },
+    "vmName": {
+      "type": "string",
+      "defaultValue": "matlab",
+      "metadata": {
+        "description": "Name of the VM."
+      }
+    },
+    "newOrExistingVirtualNetwork": {
+      "type": "string",
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Determines whether a new or existing virtual network should be provisioned."
+      }
+    },
+    "virtualNetworkName": {
+      "type": "string",
+      "defaultValue": "VirtualNetwork",
+      "metadata": {
+        "description": "Name of the virtual network."
+      }
+    },
+    "addressPrefixes": {
+      "type": "array",
+      "defaultValue": [
+        "10.0.0.0/16"
+      ],
+      "metadata": {
+        "description": "Address prefix of the virtual network."
+      }
+    },
+    "subnetPrefix": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "Subnet prefix of the virtual network."
+      }
+    },
+    "virtualNetworkResourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the existing virtual network."
+      }
+    },
+    "publicIpNewOrExisting": {
+      "type": "string",
+      "defaultValue": "new",
+      "metadata": {
+        "description": "Determines whether a new or existing public IP should be provisioned."
+      }
+    },
+    "publicIpName": {
+      "type": "string",
+      "defaultValue": "PublicIp",
+      "metadata": {
+        "description": "Name of the public IP address."
+      }
+    },
+    "publicIpDns": {
+      "type": "string",
+      "defaultValue": "[concat('linux-vm-', uniqueString(resourceGroup().id))]",
+      "metadata": {
+        "description": "DNS of the public IP address for the VM."
+      }
+    },
+    "publicIpResourceGroupName": {
+      "type": "string",
+      "defaultValue": "[resourceGroup().name]",
+      "metadata": {
+        "description": "Name of the resource group for the public IP address."
+      }
+    },
+    "publicIpAllocationMethod": {
+      "type": "string",
+      "defaultValue": "Dynamic",
+      "allowedValues": [
+        "Dynamic",
+        "Static"
+      ],
+      "metadata": {
+        "description": "Allocation method for the public IP address."
+      }
+    },
+    "publicIpSku": {
+      "type": "string",
+      "defaultValue": "Basic",
+      "allowedValues": [
+        "Basic",
+        "Standard"
+      ],
+      "metadata": {
+        "description": "Name of the resource group for the public IP address."
+      }
+    },
+    "_artifactsLocation": {
+      "type": "string",
+      "metadata": {
+        "description": "The base URI where artifacts required by this template are located including a trailing '/'"
+      },
+      "defaultValue": "[deployment().properties.templateLink.uri]"
+    },
+    "_artifactsLocationSasToken": {
+      "type": "securestring",
+      "metadata": {
+        "description": "The sasToken required to access _artifactsLocation.  When the template is deployed using the accompanying scripts, a sasToken will be automatically generated. Use the defaultValue if the staging location is not secured."
+      },
+      "defaultValue": ""
     }
   },
   "variables": {
     "prefix": "matlab",
-    "addressPrefix": [
-      "10.0.0.0/16"
-    ],
-    "subnetPrefix": "10.0.0.0/24",
+    "addressPrefix": "[parameters('addressPrefixes')]",
+    "subnetPrefix": "[parameters('subnetPrefix')]",
     "adminUsername": "[parameters('adminUsername')]",
-    "newOrExistingVirtualNetwork": "Existing",
-    "virtualNetworkCreateName": "[concat(variables('prefix'), '-vnet')]",
-    "subnetCreateName": "[concat(variables('prefix'), '-subnet')]",
-    "virtualNetworkName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),last(split(parameters('virtualNetworkResourceID'),'/')),variables('virtualNetworkCreateName'))]",
-    "subnetName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),parameters('subnetName'),variables('subnetCreateName'))]",
-    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
-    "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'New'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
-    "location": "[resourceGroup().location]",
+    "newOrExistingVirtualNetwork": "[parameters('newOrExistingVirtualNetwork')]",
+    "virtualNetworkName": "[parameters('virtualNetworkName')]",
+    "subnetName": "[parameters('subnetName')]",
     "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
     "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
     "customCommandToRun": "[concat('sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
     "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
-    "publicIp": "[concat(variables('prefix'), '-publicIP')]",
-    "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
+    "publicIp": "[parameters('publicIpName')]",
     "nicName": "[concat(variables('prefix'), '-nic')]",
-    "vmName": "[concat(variables('prefix'),  '-vm')]",
+    "vmName": "[parameters('vmName')]",
     "hostName": "matlabvm",
     "providerID": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
     "tagsForAll": {
@@ -141,34 +216,22 @@
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2022b-vm-linux-sku",
     "version": "latest",
-    "imageReference": {
-      "publisher": "[variables('publisher')]",
-      "offer": "[variables('offer')]",
-      "sku": "[variables('sku')]",
-      "version": "[variables('version')]"
-    },
-    "plan": {
-      "name": "[variables('sku')]",
-      "publisher": "[variables('publisher')]",
-      "product": "[variables('offer')]"
-    },
     "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
     "runtimeStack": "powershell",
     "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
-    "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure.git",
-    "branch": "master",
-    "functionappDirectory": "function-apps/",
     "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
     "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
     "roleName": "[concat('customroleforfunctionapp',uniqueString(resourceGroup().name))]",
-    "roleDefinitionId": "[guid(subscription().subscriptionId,variables('roleName'))]"
+    "roleDefinitionId": "[guid(subscription().subscriptionId,variables('roleName'))]",
+    "zipUrl": "[uri(parameters('_artifactsLocation'), concat('artifacts/mw-functionapp-files.zip', parameters('_artifactsLocationSasToken')))]",
+    "publicIPAddressId": "[resourceId(parameters('publicIpResourceGroupName'), 'Microsoft.Network/publicIPAddresses', parameters('publicIpName'))]"
   },
   "resources": [
     {
       "type": "Microsoft.Network/virtualNetworks",
       "apiVersion": "2022-07-01",
       "name": "[variables('virtualNetworkName')]",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
         "addressSpace": {
@@ -176,7 +239,7 @@
         },
         "subnets": [
           {
-            "name": "[variables('subnetCreateName')]",
+            "name": "[parameters('subnetName')]",
             "properties": {
               "addressPrefix": "[variables('subnetPrefix')]"
             }
@@ -189,7 +252,7 @@
       "name": "[variables('networkSecurityGroupName')]",
       "type": "Microsoft.Network/networkSecurityGroups",
       "apiVersion": "2022-07-01",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
         "securityRules": [
@@ -239,24 +302,30 @@
       "name": "[variables('publicIp')]",
       "type": "Microsoft.Network/publicIPAddresses",
       "apiVersion": "2022-07-01",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
-        "publicIPAllocationMethod": "Static",
+        "publicIPAllocationMethod": "[parameters('publicIpAllocationMethod')]",
         "dnsSettings": {
-          "domainNameLabel": "[variables('domainNameLabel')]"
+          "domainNameLabel": "[parameters('publicIpDns')]"
         },
         "idleTimeoutInMinutes": 20
+      },
+      "condition": "[equals(parameters('publicIpNewOrExisting'), 'new')]",
+      "sku": {
+        "name": "[parameters('publicIpSku')]"
       }
     },
     {
       "name": "[variables('nicName')]",
       "type": "Microsoft.Network/networkInterfaces",
       "apiVersion": "2022-07-01",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIp'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIp'))]",
+        "[parameters('publicIpName')]",
+        "[parameters('virtualNetworkName')]"
       ],
       "properties": {
         "ipConfigurations": [
@@ -264,11 +333,11 @@
             "name": "nic1IpConfig",
             "properties": {
               "subnet": {
-                "id": "[variables('subnetId')]"
+                "id": "[resourceId(parameters('virtualNetworkResourceGroupName'), 'Microsoft.Network/virtualNetworks/subnets/', variables('virtualNetworkName'), variables('subnetName'))]"
               },
               "privateIPAllocationMethod": "Dynamic",
               "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIp'))]"
+                "id": "[if(not(equals(parameters('publicIpNewOrExisting'), 'none')), variables('publicIPAddressId') , json('null'))]"
               }
             }
           }
@@ -281,7 +350,7 @@
     {
       "type": "Microsoft.Compute/virtualMachines",
       "apiVersion": "2022-11-01",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "name": "[variables('vmName')]",
       "plan": {
@@ -336,7 +405,7 @@
         {
           "name": "config-app",
           "type": "extensions",
-          "location": "[variables('location')]",
+          "location": "[parameters('location')]",
           "apiVersion": "2022-11-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
@@ -376,7 +445,7 @@
       "name": "[variables('functionAppName')]",
       "type": "Microsoft.Web/sites",
       "apiVersion": "2022-03-01",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "kind": "functionapp",
       "identity": {
         "type": "SystemAssigned"
@@ -409,10 +478,6 @@
               "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2022-09-01').keys[0].value)]"
             },
             {
-              "name": "PROJECT",
-              "value": "[variables('functionappDirectory')]"
-            },
-            {
               "name": "RESOURCE_GROUP_NAME",
               "value": "[resourceGroup().name]"
             },
@@ -426,17 +491,16 @@
       "resources": [
         {
           "apiVersion": "2022-03-01",
-          "name": "web",
-          "type": "sourcecontrols",
+          "name": "MSDeploy",
+          "type": "Extensions",
           "dependsOn": [
             "[resourceId('Microsoft.Web/Sites/', variables('functionAppName'))]"
           ],
           "properties": {
-            "RepoUrl": "[variables('repoURL')]",
-            "branch": "[variables('branch')]",
-            "IsManualIntegration": true,
-            "isGitHubAction": false
-          }
+            "packageUri": "[variables('zipUrl')]"
+          },
+          "location": "[parameters('location')]",
+          "condition": "[not(equals(variables('zipUrl'), ''))]"
         }
       ]
     },
@@ -484,7 +548,7 @@
       "apiVersion": "2022-09-01",
       "name": "[variables('storageAccountName')]",
       "kind": "StorageV2",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "sku": {
         "name": "Standard_LRS"
       }
@@ -493,13 +557,13 @@
       "name": "[variables('appInsightsWorkspace')]",
       "apiVersion": "2022-10-01",
       "type": "Microsoft.OperationalInsights/workspaces",
-      "location": "[variables('location')]"
+      "location": "[parameters('location')]"
     },
     {
       "name": "[variables('appinsightsName')]",
       "apiVersion": "2020-02-02",
       "type": "Microsoft.Insights/components",
-      "location": "[variables('location')]",
+      "location": "[parameters('location')]",
       "dependsOn": [
         "[variables('appInsightsWorkspace')]"
       ],
