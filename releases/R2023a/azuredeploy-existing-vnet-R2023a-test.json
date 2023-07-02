@@ -144,7 +144,7 @@
         "location": "[resourceGroup().location]",
         "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
         "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
-        "customCommandToRun": "[concat('sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
+        "customCommandToRun": "[concat('sudo apt update;sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
         "publicIp": "[concat(variables('prefix'), '-publicIP')]",
         "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
@@ -327,8 +327,7 @@
                     "adminPassword": "[parameters('adminPassword')]",
                     "linuxConfiguration": {
                         "disablePasswordAuthentication": false
-                    },
-                    "customData": "[base64('#cloud-config\napt_update: true')]"
+                    }
                 },
                 "networkProfile": {
                     "networkInterfaces": [
