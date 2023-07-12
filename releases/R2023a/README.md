@@ -84,8 +84,6 @@ Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The
 
 ## Switching remote protocols to access the MATLAB virtual machine
 
->   **Note:** These directions are valid only if you choose to enable NICE DCV in the virtual machine.
-
 If you wish to switch from NICE DCV to xRDP, run the following command using [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/what-is-azure-cli) or [Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview):
 ```
 az vm run-command invoke --command-id RunShellScript --resource-group <RESOURCE_GROUP_NAME> --name <VM_NAME> --script "/usr/local/bin/swap-desktop-solution.sh rdp" 
@@ -95,6 +93,23 @@ To switch from xRDP to NICE DCV, run:
 az vm run-command invoke --command-id RunShellScript --resource-group <RESOURCE_GROUP_NAME> --name <VM_NAME> --script "/usr/local/bin/swap-desktop-solution.sh dcv" 
 ```
 Here, `<RESOURCE_GROUP_NAME>` denotes the name of the resource group created in [Step 2](#step-2-configure-cloud-resources) and `<VM_NAME>` is the name of the VM running MATLAB (for example - `matlab-vm`).
+
+## Configuring production license for NICE DCV after deployment
+
+If you want to configure the NICE DCV server running on the `matlab-vm` to use a production license, follow these instructions:
+
+1. If you have a production license file, copy it to the `matlab-vm` under the path `/usr/share/dcv/license`. 
+
+2. Navigate to `/etc/dcv/`, and open the `dcv.conf` with a text editor.
+
+3. Locate the `license-file` parameter in the `[license]` section, and enter the full path to the license file copied in step 1. 
+
+4. If you have an RLM (Reprise License Manager) server instead of a license file, modify the value of the `license-file` parameter to point to the port and hostname of the server in the format `port@hostname`.
+
+5. Once you modify the `dcv.conf` file, restart the NICE DCV server and apply the changes using: `sudo systemctl restart dcvserver`.
+
+For more information about licensing NICE DCV, see [Installing a production license](https://docs.aws.amazon.com/dcv/latest/adminguide/setting-up-production.html).
+
 ## Delete Your Resource Group
 You can remove the Resource Group and all associated resources when you are done with them. Note that you cannot recover resources once they are deleted.
 
