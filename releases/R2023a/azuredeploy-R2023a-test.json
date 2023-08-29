@@ -67,7 +67,7 @@
         "accessProtocol": {
             "type": "string",
             "metadata": {
-                "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' enables [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection."
+                "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' will enable [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection."
             },
             "defaultValue": "RDP",
             "allowedValues": [
@@ -132,7 +132,7 @@
         "location": "[resourceGroup().location]",
         "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
         "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
-        "customCommandToRun": "[concat('sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
+        "customCommandToRun": "[concat('sh /opt/mathworks/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
         "publicIp": "[concat(variables('prefix'), '-publicIP')]",
         "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
@@ -146,8 +146,8 @@
         "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
         "runtimeStack": "powershell",
         "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
-        "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure.git",
-        "branch": "master",
+        "repoUrl": "{{REPOURL}}",
+        "branch": "{{BRANCH}}",
         "functionappDirectory": "function-apps/",
         "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
         "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
@@ -170,7 +170,7 @@
     "resources": [
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2022-01-01",
+            "apiVersion": "2022-07-01",
             "name": "[variables('virtualNetworkName')]",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
@@ -192,7 +192,7 @@
         {
             "name": "[variables('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2022-01-01",
+            "apiVersion": "2022-07-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "properties": {
@@ -242,7 +242,7 @@
         {
             "name": "[variables('publicIp')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2022-01-01",
+            "apiVersion": "2022-07-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "properties": {
@@ -256,7 +256,7 @@
         {
             "name": "[variables('nicName')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2022-01-01",
+            "apiVersion": "2022-07-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "dependsOn": [
@@ -284,7 +284,7 @@
         },
         {
             "type": "Microsoft.Compute/virtualMachines",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2022-11-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "name": "[variables('vmName')]",
@@ -335,7 +335,7 @@
                     "name": "config-app",
                     "type": "extensions",
                     "location": "[variables('location')]",
-                    "apiVersion": "2022-03-01",
+                    "apiVersion": "2022-11-01",
                     "dependsOn": [
                         "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
                     ],
@@ -359,8 +359,8 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "pid-eb3e1a98-fbf3-4228-bfeb-6a49648be9cc-partnercenter",
-            "apiVersion": "2021-04-01",
+            "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
+            "apiVersion": "2022-09-01",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -396,7 +396,7 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2021-06-01').keys[0].value)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[0].value)]"
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -404,7 +404,7 @@
                         },
                         {
                             "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2021-06-01').keys[0].value)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2022-09-01').keys[0].value)]"
                         },
                         {
                             "name": "PROJECT",
@@ -479,7 +479,7 @@
         },
         {
             "type": "Microsoft.Storage/storageAccounts",
-            "apiVersion": "2022-05-01",
+            "apiVersion": "2022-09-01",
             "name": "[variables('storageAccountName')]",
             "kind": "StorageV2",
             "location": "[variables('location')]",
@@ -489,7 +489,7 @@
         },
         {
             "name": "[variables('appInsightsWorkspace')]",
-            "apiVersion": "2021-06-01",
+            "apiVersion": "2022-10-01",
             "type": "Microsoft.OperationalInsights/workspaces",
             "location": "[variables('location')]"
         },
