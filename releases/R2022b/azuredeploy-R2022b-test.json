@@ -67,7 +67,7 @@
         "accessProtocol": {
             "type": "string",
             "metadata": {
-                "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' will configure [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be configured, and you can connect to this VM using a RDP connection."
+                "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' will enable [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection."
             },
             "defaultValue": "RDP",
             "allowedValues": [
@@ -132,7 +132,7 @@
         "location": "[resourceGroup().location]",
         "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
         "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
-        "customCommandToRun": "[concat('sudo apt update;sh /usr/local/bin/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
+        "customCommandToRun": "[concat('sh /opt/mathworks/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
         "publicIp": "[concat(variables('prefix'), '-publicIP')]",
         "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
@@ -359,7 +359,7 @@
         },
         {
             "type": "Microsoft.Resources/deployments",
-            "name": "[variables('providerID')]",
+            "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
             "apiVersion": "2022-09-01",
             "properties": {
                 "mode": "Incremental",

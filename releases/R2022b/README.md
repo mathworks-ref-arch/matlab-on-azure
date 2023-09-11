@@ -44,7 +44,7 @@ Clicking the Deploy to Azure button opens the "Custom deployment" page in your b
 | **Virtual Network Resource ID** | The Resource ID of an existing virtual network to deploy your VM into. You can find this under the Properties of your virtual network. Specify this parameter only when deploying with the Existing Virtual Network option. |
 | **Subnet Name** | The name of an existing subnet within your virtual network to deploy your VM into. Specify this parameter only when deploying with the Existing Virtual Network option. |
 | **Auto Shutdown** | Select the duration after which the VM should be automatically shut down post launch. |
-| **Access Protocol** | Access protocol to connect to this VM. Selecting 'NICE DCV' will configure [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be configured, and you can connect to this VM using a RDP connection. |
+| **Access Protocol** | Access protocol to connect to this VM. Selecting 'NICE DCV' will enable [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection. |
 | **NICE DCV License Server** | If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license. |
 | **MATLAB License Server** | Optional License Manager for MATLAB, specified as a string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. For more information, see https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure. |
 | **Optional User Command** | Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e "export CLOUD=AZURE" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh "https://example.com/script.sh" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'. |
@@ -84,8 +84,6 @@ Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The
 
 ## Switching remote protocols to access the MATLAB virtual machine
 
->   **Note:** These directions are valid only if you choose to enable NICE DCV in the virtual machine.
-
 If you wish to switch from NICE DCV to xRDP, run the following command using [Azure CLI](https://learn.microsoft.com/en-us/cli/azure/what-is-azure-cli) or [Azure Cloud Shell](https://learn.microsoft.com/en-us/azure/cloud-shell/overview):
 ```
 az vm run-command invoke --command-id RunShellScript --resource-group <RESOURCE_GROUP_NAME> --name <VM_NAME> --script "/usr/local/bin/swap-desktop-solution.sh rdp" 
@@ -95,6 +93,23 @@ To switch from xRDP to NICE DCV, run:
 az vm run-command invoke --command-id RunShellScript --resource-group <RESOURCE_GROUP_NAME> --name <VM_NAME> --script "/usr/local/bin/swap-desktop-solution.sh dcv" 
 ```
 Here, `<RESOURCE_GROUP_NAME>` denotes the name of the resource group created in [Step 2](#step-2-configure-cloud-resources) and `<VM_NAME>` is the name of the VM running MATLAB (for example - `matlab-vm`).
+
+## Configuring production license for NICE DCV after deployment
+
+If you want to configure the NICE DCV server running on the `matlab-vm` to use a production license, follow these instructions:
+
+1. If you have a production license file, copy it to the `matlab-vm` under the path `/usr/share/dcv/license`. 
+
+2. Navigate to `/etc/dcv/`, and open the `dcv.conf` with a text editor.
+
+3. Locate the `license-file` parameter in the `[license]` section, and enter the full path to the license file copied in step 1. 
+
+4. If you have an RLM (Reprise License Manager) server instead of a license file, modify the value of the `license-file` parameter to point to the port and hostname of the server in the format `port@hostname`.
+
+5. Once you modify the `dcv.conf` file, restart the NICE DCV server and apply the changes using: `sudo systemctl restart dcvserver`.
+
+For more information about licensing NICE DCV, see [Installing a production license](https://docs.aws.amazon.com/dcv/latest/adminguide/setting-up-production.html).
+
 ## Delete Your Resource Group
 You can remove the Resource Group and all associated resources when you are done with them. Note that you cannot recover resources once they are deleted.
 
