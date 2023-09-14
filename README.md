@@ -3,7 +3,7 @@
 # Requirements
 Before starting, you will need the following:
 
-- A MATLAB&reg; license. For more information, see [Confirm Licensing for MathWorks Products Running on the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html).
+- A MATLAB&reg; license. For more information, see [Licensing for MathWorks Products Running on the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html).
 - A [MathWorks&reg; Account](https://www.mathworks.com/login?uri=%2Fmwaccount%2F).
 - An Azure&reg; account.
 
@@ -21,6 +21,7 @@ To view instructions for deploying the MATLAB reference architecture, select a M
 
 | Linux | Windows |
 | ----- | ------- |
+| [R2023b](releases/R2023b/README.md) | [R2023b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2023b/README.md) |
 | [R2023a](releases/R2023a/README.md) | [R2023a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2023a/README.md) |
 | [R2022b](releases/R2022b/README.md) | [R2022b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2022b/README.md) |
 | [R2022a](releases/R2022a/README.md) | [R2022a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2022a/README.md) |
@@ -79,3 +80,9 @@ You will need to edit the template and replace the appropriate sections with you
 
 # Technical Support
 If you require assistance or have a request for additional features or capabilities, please contact [MathWorks Technical Support](https://www.mathworks.com/support/contact_us.html).
+
+----
+
+Copyright 2018-2023 The MathWorks, Inc.
+
+----
