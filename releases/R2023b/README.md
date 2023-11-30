@@ -84,7 +84,7 @@ Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The
 
 # Deploy Your Own Machine Image
 For details of the scripts which form the basis of the MathWorks Linux VHD build process,
-see [Build Your Own Machine Image](https://github.com/mathworks-ref-arch/matlab-on-azure/blob/main/packer/v1/README.md).
+see [Build Your Own Machine Image](https://github.com/mathworks-ref-arch/matlab-on-azure/blob/master/packer/v1/README.md).
 You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure.
 You can then deploy this custom image with the following MathWorks infrastructure as code (IaC) templates.
 | Create Virtual Network for Custom Image | Use Existing Virtual Network for Custom Image|
