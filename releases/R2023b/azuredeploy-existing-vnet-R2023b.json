@@ -6,7 +6,7 @@
       "type": "string",
       "defaultValue": "Standard_D3_v2",
       "metadata": {
-        "description": "The Azure instance type to use for the VM. See https://docs.microsoft.com/en-us/azure/virtual-machines/sizes for a list of instance types."
+        "description": "The Azure instance type to use for the VM. For a list of instance types, see [Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
       }
     },
     "clientIPAddresses": {
@@ -98,7 +98,7 @@
       "defaultValue": "",
       "type": "String",
       "metadata": {
-        "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. For more information, see https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure."
+        "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If you do not provide this string, MATLAB uses online licensing. If you provide this string, ensure that the license manager is accessible from the specified virtual network and subnets. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure)."
       }
     },
     "optionalUserCommand": {
