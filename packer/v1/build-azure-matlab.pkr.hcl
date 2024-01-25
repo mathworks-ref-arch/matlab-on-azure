@@ -164,6 +164,10 @@ source "azure-arm" "VHD_Builder" {
 # Build the machine image.
 build {
   sources = ["source.azure-arm.VHD_Builder"]
+  
+  provisioner "shell" {
+    inline = ["/usr/bin/cloud-init status --wait"]
+  }
 
   provisioner "shell" {
     inline = ["mkdir /tmp/startup"]

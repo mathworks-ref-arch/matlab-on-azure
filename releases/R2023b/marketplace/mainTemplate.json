@@ -418,9 +418,34 @@
           "bootDiagnostics": {
             "enabled": false
           }
-        },
-        "userData": "[base64(join(variables('userDataScript'), '\n'))]"
-      }
+        }
+      },
+      "resources": [
+        {
+          "name": "startup",
+          "type": "extensions",
+          "location": "[parameters('location')]",
+          "apiVersion": "2022-11-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "startup"
+          },
+          "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.1",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "skipDos2Unix": false
+            },
+            "protectedSettings": {
+              "script": "[base64(join(variables('userDataScript'), '\n'))]"
+            }
+          }
+        }
+      ]
     },
     {
       "type": "Microsoft.Resources/deployments",

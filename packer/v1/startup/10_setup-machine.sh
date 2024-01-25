@@ -12,6 +12,10 @@ chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
 mkdir -p /home/${USERNAME}/Desktop
 cp -f /etc/skel/Desktop/matlab.desktop /home/${USERNAME}/Desktop/
 
+# Refresh icon cache
+sudo update-icon-caches /usr/share/icons/*
+sudo dconf update 
+
 # Specify user for auto-login
 # Make sure that we do not set an empty string
 if [[ -n "${USERNAME}" ]]; then
