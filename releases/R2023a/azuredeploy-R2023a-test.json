@@ -2,11 +2,29 @@
     "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
     "contentVersion": "1.0.0.0",
     "parameters": {
+        "customVHD": {
+            "type": "string",
+            "metadata": {
+                "description": "URL of custom virtual hard disk (VHD). To use a prebuilt MathWorks image instead, see [https://github.com/mathworks-ref-arch/matlab-on-azure.git](https://github.com/mathworks-ref-arch/matlab-on-azure.git)."
+            }
+        },
+        "customVHDStorageAccount": {
+            "type": "string",
+            "metadata": {
+                "description": "Storage account that contains the custom VHD."
+            }
+        },
+        "customVHDResourceGroup": {
+            "type": "string",
+            "metadata": {
+                "description": "Resource group that contains the custom VHD."
+            }
+        },
         "vmSize": {
             "type": "string",
             "defaultValue": "Standard_D3_v2",
             "metadata": {
-                "description": "The Azure instance type to use for the VM. See https://docs.microsoft.com/en-us/azure/virtual-machines/sizes for a list of instance types."
+                "description": "The Azure instance type to use for the VM. For a list of instance types, see [Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
             }
         },
         "clientIPAddresses": {
@@ -86,7 +104,7 @@
             "defaultValue": "",
             "type": "String",
             "metadata": {
-                "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. For more information, see https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure."
+                "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If you do not provide this string, MATLAB uses online licensing. If you provide this string, ensure that the license manager is accessible from the specified virtual network and subnets. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure)."
             }
         },
         "optionalUserCommand": {
@@ -94,24 +112,6 @@
             "type": "String",
             "metadata": {
                 "description": "Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e \"export CLOUD=AZURE\" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh \"https://example.com/script.sh\" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'."
-            }
-        },
-        "vmdisk1Uri": {
-            "type": "string",
-            "metadata": {
-                "description": "URI of the image to use"
-            }
-        },
-        "userImageStorageAccountResourceGroupName": {
-            "type": "string",
-            "metadata": {
-                "description": "The storage account resource group into which to put the VHD. Must be the same as the storage account resource group that contains vmdisk1Uri."
-            }
-        },
-        "userImageStorageAccountName": {
-            "type": "string",
-            "metadata": {
-                "description": "The storage account into which to put the VHD. Must be the same as the storage account that contains vmdisk1Uri."
             }
         }
     },
@@ -130,9 +130,29 @@
         "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
         "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'New'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
         "location": "[resourceGroup().location]",
-        "licenseServer": "[if(equals(parameters('matlabLicenseServer'),''),'mhlm',parameters('matlabLicenseServer'))]",
-        "niceDcvLicenseServer": "[if(equals(parameters('niceDcvLicenseServer'),''),'demo',parameters('niceDcvLicenseServer'))]",
-        "customCommandToRun": "[concat('sh /opt/mathworks/startup/install-extensions.sh', ' ', variables('licenseServer'),' ', 'MATLAB:AZURE:V1', ' ', last(split(parameters('accessProtocol'),' ')), ' ', parameters('adminUsername'), ' ', variables('niceDcvLicenseServer'), ' ''', parameters('optionalUserCommand'), '''')]",
+        "userDataScript": [
+            "#!/usr/bin/env bash",
+            "# Copyright 2023 The MathWorks, Inc.",
+            "",
+            "STARTUP_FOLDER=/opt/mathworks/startup",
+            "# Load startup variables",
+            "if [[ -r ${STARTUP_FOLDER}/.env ]]; then",
+            "    set -o allexport",
+            "    source ${STARTUP_FOLDER}/.env",
+            "    set +o allexport",
+            "fi",
+            "",
+            "# Define startup parameters",
+            "[concat('export MLM_LICENSE_FILE=', parameters('matlabLicenseServer'))]",
+            "[concat('export ACCESS_PROTOCOL=', '''', parameters('accessProtocol'), '''')]",
+            "[concat('export USERNAME=', parameters('adminUsername'))]",
+            "[concat('export NICE_DCV_LICENSE_SERVER=', parameters('niceDcvLicenseServer'))]",
+            "[concat('export OPTIONAL_USER_COMMAND=', '''', parameters('optionalUserCommand'), '''')]",
+            "",
+            "# Run startup scripts",
+            "mkdir -p /var/log/mathworks",
+            "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1"
+        ],
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
         "publicIp": "[concat(variables('prefix'), '-publicIP')]",
         "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
@@ -159,7 +179,7 @@
             "caching": "ReadOnly",
             "createOption": "FromImage",
             "image": {
-                "uri": "[parameters('vmdisk1Uri')]"
+                "uri": "[parameters('customVHD')]"
             }
         },
         "storageProfileWithoutDataDisk": {
@@ -302,10 +322,10 @@
                         "caching": "ReadWrite",
                         "createOption": "FromImage",
                         "image": {
-                            "uri": "[parameters('vmdisk1Uri')]"
+                            "uri": "[parameters('customVHD')]"
                         },
                         "vhd": {
-                            "uri": "[concat(reference(resourceId(parameters('userImageStorageAccountResourceGroupName'), 'Microsoft.Storage/storageAccounts/', parameters('userImageStorageAccountName')), variables('storageAccountApiVersion')).primaryEndpoints.blob, 'vhds/',variables('vmName'), uniquestring(resourceGroup().id), '-osDisk.vhd')]"
+                            "uri": "[concat(reference(resourceId(parameters('customVHDResourceGroup'), 'Microsoft.Storage/storageAccounts/', parameters('customVHDStorageAccount')), variables('storageAccountApiVersion')).primaryEndpoints.blob, 'vhds/',variables('vmName'), uniquestring(resourceGroup().id), '-osDisk.vhd')]"
                         }
                     }
                 },
@@ -332,7 +352,7 @@
             },
             "resources": [
                 {
-                    "name": "config-app",
+                    "name": "startup",
                     "type": "extensions",
                     "location": "[variables('location')]",
                     "apiVersion": "2022-11-01",
@@ -340,18 +360,18 @@
                         "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
                     ],
                     "tags": {
-                        "displayName": "config-app"
+                        "displayName": "startup"
                     },
                     "properties": {
                         "publisher": "Microsoft.Azure.Extensions",
                         "type": "CustomScript",
-                        "typeHandlerVersion": "2.0",
+                        "typeHandlerVersion": "2.1",
                         "autoUpgradeMinorVersion": true,
                         "settings": {
                             "skipDos2Unix": false
                         },
                         "protectedSettings": {
-                            "commandToExecute": "[variables('customCommandToRun')]"
+                            "script": "[base64(join(variables('userDataScript'), '\n'))]"
                         }
                     }
                 }
