@@ -12,7 +12,7 @@ variable "PRODUCTS" {
 
 variable "RELEASE" {
   type        = string
-  default     = "R2023b"
+  default     = "R2024a"
   description = "Target MATLAB release to install in the machine image, must start with \"R\"."
 
   validation {
@@ -47,13 +47,13 @@ variable "DCV_INSTALLER_URL" {
 
 variable "NVIDIA_DRIVER_VERSION" {
   type        = string
-  default     = "515"
+  default     = "535"
   description = "The version of target NVIDIA Driver to install."
 }
 
 variable "NVIDIA_CUDA_TOOLKIT" {
   type        = string
-  default     = "https://developer.download.nvidia.com/compute/cuda/11.7.1/local_installers/cuda_11.7.1_515.65.01_linux.run"
+  default     = "https://developer.download.nvidia.com/compute/cuda/12.2.2/local_installers/cuda_12.2.2_535.104.05_linux.run"
   description = "The URL to install NVIDIA CUDA Toolkit into the target machine image."
 }
 
@@ -61,6 +61,12 @@ variable "NVIDIA_CUDA_KEYRING_URL" {
   type        = string
   default     = "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb"
   description = "NVIDIA CUDA keyring url."
+}
+
+variable "MATLAB_SOURCE_URL" {
+  type        = string
+  default     = ""
+  description = "Optional URL from which to download a MATLAB and toolbox source file, for use with the mpm --source option."
 }
 
 variable "CLIENT_ID" {
@@ -164,11 +170,11 @@ source "azure-arm" "VHD_Builder" {
 # Build the machine image.
 build {
   sources = ["source.azure-arm.VHD_Builder"]
-  
+
   provisioner "shell" {
     inline = ["/usr/bin/cloud-init status --wait"]
   }
-
+  
   provisioner "shell" {
     inline = ["mkdir /tmp/startup"]
   }
@@ -196,6 +202,7 @@ build {
       "NVIDIA_DRIVER_VERSION=${var.NVIDIA_DRIVER_VERSION}",
       "NVIDIA_CUDA_TOOLKIT=${var.NVIDIA_CUDA_TOOLKIT}",
       "NVIDIA_CUDA_KEYRING_URL=${var.NVIDIA_CUDA_KEYRING_URL}",
+      "MATLAB_SOURCE_URL=${var.MATLAB_SOURCE_URL}",
       "MATLAB_ROOT=/usr/local/matlab"
     ]
     expect_disconnect = true
