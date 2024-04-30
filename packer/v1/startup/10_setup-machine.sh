@@ -5,8 +5,8 @@
 PS4='[\d \t] '
 set -x
 
-# Fix home folder permissions
-chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
+# Make the current user the owner of MATLAB_ROOT to allow support packages installation without sudo permissions
+GROUP=$(id -gn ${USERNAME}) && chown -R ${USERNAME}:${GROUP} ${MATLAB_ROOT} &
 
 # Ensure that the MATLAB icon is in the desktop
 mkdir -p /home/${USERNAME}/Desktop
@@ -27,6 +27,5 @@ if [[ -d /proc/driver/nvidia/gpus ]]; then
     nvidia-xconfig --enable-all-gpus --preserve-busid
 fi
 
-# Enable unattended-upgrades
-echo 'APT::Periodic::Update-Package-Lists "1";' > /etc/apt/apt.conf.d/20auto-upgrades
-echo 'APT::Periodic::Unattended-Upgrade "1";' >> /etc/apt/apt.conf.d/20auto-upgrades
+# Fix home folder permissions
+chown -R ${USERNAME}:${USERNAME} /home/${USERNAME}
