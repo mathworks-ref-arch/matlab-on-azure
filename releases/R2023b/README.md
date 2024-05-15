@@ -7,9 +7,9 @@ To deploy this reference architecture, you must have the following permissions t
 1. `Microsoft.Authorization/roleDefinitions/write`
 2. `Microsoft.Authorization/roleAssignments/write`
 
-To check if you have these permissions for your Azure subscription, please follow the steps mentioned in [Check access for a user to Azure resources](https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access).
+To check if you have these permissions for your Azure subscription, follow the steps mentioned in [Check access for a user to Azure resources](https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access).
 
-If you do not have these permissions, you can obtain them in one of the two ways:
+If you do not have these permissions, you can obtain them in two ways:
 
 1. The built-in Azure role [User Access Administrator](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator) contains the above-mentioned permissions. Administrators or Owners of the subscription can directly assign you this role in addition to your existing role. To assign roles using the Azure portal, see [Assign Azure roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
 
@@ -33,7 +33,7 @@ To deploy a custom machine image, see [Deploy Your Own Machine Image](#deploy-yo
 
 ## Step 2. Configure the Cloud Resources
 
-Clicking the Deploy to Azure button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side.
+Clicking the **Deploy to Azure** button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side. Create a new resource group by clicking **Create New**. Alternatively, you can select an existing resource group, but this can cause conflicts if resources are already deployed in it.
 
 1. Specify and check the defaults for these resource parameters:
 
@@ -143,6 +143,6 @@ If your resource group fails to deploy, check the Deployments section of the Res
 
 ----
 
-Copyright 2018-2023 The MathWorks, Inc.
+Copyright 2018-2024 The MathWorks, Inc.
 
 ----
