@@ -29,7 +29,7 @@ variable "BUILD_SCRIPTS" {
 
 variable "STARTUP_SCRIPTS" {
   type        = list(string)
-  default     = [".env", "10_setup-machine.sh", "20_install-nicedcv.sh", "30_setup-rdp.sh", "40_setup-nicedcv.sh", "50_setup-matlab.sh", "80_warmup-matlab.sh", "90_run-optional-user-command.sh"]
+  default     = [".env", "10_setup-machine.sh", "20_install-nicedcv.sh", "30_setup-rdp.sh", "40_setup-nicedcv.sh", "50_setup-matlab.sh", "80_warmup-matlab.sh", "85_warmup-mathworks-service-host.sh","90_run-optional-user-command.sh"]
   description = "The list of startup scripts Packer will copy to the remote machine image build, which can be used during the deployment creation."
 }
 

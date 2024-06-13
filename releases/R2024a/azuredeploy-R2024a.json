@@ -133,7 +133,8 @@
       "",
       "# Run startup scripts",
       "mkdir -p /var/log/mathworks",
-      "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1"
+      "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1",
+      "sudo update-icon-caches /usr/share/icons/*"
     ],
     "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
     "publicIp": "[concat(variables('prefix'), '-publicIP')]",
@@ -148,7 +149,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2024a-vm-linux-sku",
-    "version": "1.0.3",
+    "version": "1.0.4",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
