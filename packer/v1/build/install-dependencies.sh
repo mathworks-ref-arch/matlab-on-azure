@@ -13,6 +13,9 @@ sudo apt-get -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--forc
 # Ensure essential utilities are installed
 sudo apt-get -qq install gcc make unzip wget
 
+# Install Azure CLI
+curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+
 # Install pip
 curl https://bootstrap.pypa.io/get-pip.py | sudo python3
 

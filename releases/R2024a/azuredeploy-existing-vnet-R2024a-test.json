@@ -163,8 +163,7 @@
             "",
             "# Run startup scripts",
             "mkdir -p /var/log/mathworks",
-            "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1",
-            "sudo update-icon-caches /usr/share/icons/*"
+            "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1"
         ],
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
         "publicIp": "[concat(variables('prefix'), '-publicIP')]",
