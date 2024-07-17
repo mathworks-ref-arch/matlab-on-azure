@@ -249,7 +249,7 @@
   "resources": [
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "name": "[variables('virtualNetworkName')]",
       "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
@@ -271,7 +271,7 @@
     {
       "name": "[variables('networkSecurityGroupName')]",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
@@ -321,7 +321,7 @@
     {
       "name": "[variables('publicIp')]",
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
@@ -339,7 +339,7 @@
     {
       "name": "[variables('nicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[parameters('location')]",
       "tags": "[variables('tagsForAll')]",
       "dependsOn": [
@@ -463,7 +463,7 @@
     {
       "name": "[variables('functionAppName')]",
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2023-01-01",
       "location": "[parameters('location')]",
       "kind": "functionapp",
       "identity": {
@@ -509,7 +509,7 @@
       },
       "resources": [
         {
-          "apiVersion": "2022-03-01",
+          "apiVersion": "2023-01-01",
           "name": "MSDeploy",
           "type": "Extensions",
           "dependsOn": [
@@ -557,7 +557,7 @@
       "properties": {
         "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
         "principalType": "ServicePrincipal",
-        "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2022-03-01', 'Full').identity.principalId]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId]",
         "scope": "[resourceGroup().id]"
       }
     },
