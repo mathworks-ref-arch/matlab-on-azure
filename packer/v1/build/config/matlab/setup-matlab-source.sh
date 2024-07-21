@@ -10,6 +10,7 @@
 # Exit on any failure
 set -eo pipefail
 
+
 # Input arguments
 ACTION=$1
 FILE_SHARE_NAME=$2
