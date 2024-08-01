@@ -160,7 +160,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2023b-vm-linux-sku",
-    "version": "1.0.7",
+    "version": "1.0.8",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
@@ -186,7 +186,7 @@
   "resources": [
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "name": "[variables('virtualNetworkName')]",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
@@ -208,7 +208,7 @@
     {
       "name": "[variables('networkSecurityGroupName')]",
       "type": "Microsoft.Network/networkSecurityGroups",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
@@ -258,7 +258,7 @@
     {
       "name": "[variables('publicIp')]",
       "type": "Microsoft.Network/publicIPAddresses",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
@@ -272,7 +272,7 @@
     {
       "name": "[variables('nicName')]",
       "type": "Microsoft.Network/networkInterfaces",
-      "apiVersion": "2022-07-01",
+      "apiVersion": "2023-06-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "dependsOn": [
@@ -394,7 +394,7 @@
     {
       "name": "[variables('functionAppName')]",
       "type": "Microsoft.Web/sites",
-      "apiVersion": "2022-03-01",
+      "apiVersion": "2023-01-01",
       "location": "[variables('location')]",
       "kind": "functionapp",
       "identity": {
@@ -444,7 +444,7 @@
       },
       "resources": [
         {
-          "apiVersion": "2022-03-01",
+          "apiVersion": "2023-01-01",
           "name": "web",
           "type": "sourcecontrols",
           "dependsOn": [
@@ -494,7 +494,7 @@
       "properties": {
         "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
         "principalType": "ServicePrincipal",
-        "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2022-03-01', 'Full').identity.principalId]",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId]",
         "scope": "[resourceGroup().id]"
       }
     },

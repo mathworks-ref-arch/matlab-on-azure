@@ -1,4 +1,4 @@
-# Copyright 2023 The MathWorks Inc.
+# Copyright 2023-2024 The MathWorks, Inc.
 
 # The following variables may have different values across MATLAB releases.
 # MathWorks recommends that you modify them via the configuration file specific to each release.

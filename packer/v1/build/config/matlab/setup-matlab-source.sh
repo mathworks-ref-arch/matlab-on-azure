@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 
+# Copyright 2024 The MathWorks, Inc.
+
 # This script mounts and optionally unmounts the Azure file share used for MATLAB installation.
 
 # Usage:
@@ -7,7 +9,7 @@
 # To unmount: ./setup-matlab-source.sh unmount <FILE_SHARE_NAME>
 # Copyright 2024 The MathWorks Inc.
 
-# Exit on any failure
+# Exit on any failure, treat unset substitution variables as errors
 set -eo pipefail
 
 
