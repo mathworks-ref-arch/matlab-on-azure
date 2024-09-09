@@ -50,7 +50,7 @@ sudo ./mpm install \
   ${source_arguments} \
   --destination="${MATLAB_ROOT}" \
   --products ${PRODUCTS} \
-  || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && false) \
+  || (echo "MPM Installation Failure. See below for more information:" && cat /tmp/mathworks_root.log && exit 1) \
   && sudo rm -f mpm /tmp/mathworks_root.log
 
 # If a source location for installation was provided, delete related files and folders after install.

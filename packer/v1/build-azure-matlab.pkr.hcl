@@ -11,6 +11,12 @@ variable "PRODUCTS" {
   description = "Target products to install in the machine image, e.g. MATLAB Simulink."
 }
 
+variable "SPKGS" {
+  type        = string
+  default     = "Deep_Learning_Toolbox_Model_for_AlexNet_Network Deep_Learning_Toolbox_Model_for_EfficientNet-b0_Network Deep_Learning_Toolbox_Model_for_GoogLeNet_Network Deep_Learning_Toolbox_Model_for_ResNet-101_Network Deep_Learning_Toolbox_Model_for_ResNet-18_Network Deep_Learning_Toolbox_Model_for_ResNet-50_Network Deep_Learning_Toolbox_Model_for_Inception-ResNet-v2_Network Deep_Learning_Toolbox_Model_for_Inception-v3_Network Deep_Learning_Toolbox_Model_for_DenseNet-201_Network Deep_Learning_Toolbox_Model_for_Xception_Network Deep_Learning_Toolbox_Model_for_MobileNet-v2_Network Deep_Learning_Toolbox_Model_for_Places365-GoogLeNet_Network Deep_Learning_Toolbox_Model_for_NASNet-Large_Network Deep_Learning_Toolbox_Model_for_NASNet-Mobile_Network Deep_Learning_Toolbox_Model_for_ShuffleNet_Network Deep_Learning_Toolbox_Model_for_DarkNet-19_Network Deep_Learning_Toolbox_Model_for_DarkNet-53_Network Deep_Learning_Toolbox_Model_for_VGG-16_Network Deep_Learning_Toolbox_Model_for_VGG-19_Network"
+  description = "Target support packages to install in the machine image, e.g. Deep_Learning_Toolbox_Model_for_AlexNet_Network."
+}
+
 variable "RELEASE" {
   type        = string
   default     = "R2024a"
@@ -24,7 +30,7 @@ variable "RELEASE" {
 
 variable "BUILD_SCRIPTS" {
   type        = list(string)
-  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
+  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "install-support-packages.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
   description = "The list of installation scripts Packer will use when building the image."
 }
 
@@ -68,6 +74,12 @@ variable "MATLAB_SOURCE_LOCATION" {
   type        = string
   default     = ""
   description = "Optional variable to specify the location from which to download a MATLAB and toolbox source file, for use with the mpm --source option."
+}
+
+variable "SPKG_SOURCE_LOCATION" {
+  type        = string
+  default     = ""
+  description = "Optional URL from which to download a support packages source file, for use with the mpm --source option."
 }
 
 variable "CLIENT_ID" {
@@ -211,12 +223,14 @@ build {
   provisioner "shell" {
     environment_vars = [
       "RELEASE=${var.RELEASE}",
+      "SPKGS=${var.SPKGS}",
       "PRODUCTS=${var.PRODUCTS}",
       "DCV_INSTALLER_URL=${var.DCV_INSTALLER_URL}",
       "NVIDIA_DRIVER_VERSION=${var.NVIDIA_DRIVER_VERSION}",
       "NVIDIA_CUDA_TOOLKIT=${var.NVIDIA_CUDA_TOOLKIT}",
       "NVIDIA_CUDA_KEYRING_URL=${var.NVIDIA_CUDA_KEYRING_URL}",
       "MATLAB_SOURCE_LOCATION=${var.MATLAB_SOURCE_LOCATION}",
+      "SPKG_SOURCE_LOCATION=${var.SPKG_SOURCE_LOCATION}",
       "AZURE_KEY_VAULT=${var.AZURE_KEY_VAULT}",
       "MATLAB_ROOT=/usr/local/matlab"
     ]
@@ -235,6 +249,7 @@ build {
     custom_data = {
       release             = "MATLAB ${var.RELEASE}"
       specified_products  = "${var.PRODUCTS}"
+      specified_spkgs     = "${var.SPKGS}"
       build_scripts       = join(", ", "${var.BUILD_SCRIPTS}")
       storage_account     = "${var.STORAGE_ACCOUNT}"
       resource_group_name = "${var.RESOURCE_GROUP_NAME}"
