@@ -11,7 +11,7 @@ sudo apt-get -qq update
 sudo apt-get -qq -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" upgrade
 
 # Ensure essential utilities are installed
-sudo apt-get -qq install gcc make unzip wget
+sudo apt-get -qq install gcc jq make unzip wget
 
 # Install Azure CLI
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
