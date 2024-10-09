@@ -2,14 +2,14 @@
 
 ## Prerequisites
 
-To deploy this reference architecture, you must have the following permissions that allow you to create and assign Azure roles in your subscription:
+To deploy this reference architecture, you must have the following permissions that allow you to create and assign Azure&reg; roles in your subscription:
 
 1. `Microsoft.Authorization/roleDefinitions/write`
 2. `Microsoft.Authorization/roleAssignments/write`
 
-To check if you have these permissions for your Azure subscription, please follow the steps mentioned in [Check access for a user to Azure resources](https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access).
+To check if you have these permissions for your Azure subscription, follow the steps mentioned in [Check access for a user to Azure resources](https://learn.microsoft.com/en-us/azure/role-based-access-control/check-access).
 
-If you do not have these permissions, you can obtain them in one of the two ways:
+If you do not have these permissions, you can obtain them in two ways:
 
 1. The built-in Azure role [User Access Administrator](https://learn.microsoft.com/en-us/azure/role-based-access-control/built-in-roles#user-access-administrator) contains the above-mentioned permissions. Administrators or Owners of the subscription can directly assign you this role in addition to your existing role. To assign roles using the Azure portal, see [Assign Azure roles](https://learn.microsoft.com/en-us/azure/role-based-access-control/role-assignments-portal).
 
@@ -25,19 +25,21 @@ Click the **Deploy to Azure** button below to deploy the cloud resources on Azur
 | --- | --- |
 | Use this option to deploy the resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-R2022b.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-existing-vnet-R2022b.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
 
-> VM Platform: Ubuntu 20.04
+> VM Platform: Ubuntu 22.04
   
-> MATLAB Release: R2022b
+> MATLAB&reg; Release: R2022b
+
+To deploy a custom machine image, see [Deploy Your Own Machine Image](#deploy-your-own-machine-image).
 
 ## Step 2. Configure the Cloud Resources
 
-Clicking the Deploy to Azure button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side.
+Clicking the **Deploy to Azure** button opens the "Custom deployment" page in your browser. You can configure the parameters on this page. It is easier to complete the steps if you position these instructions and the Azure Portal window side by side. Create a new resource group by clicking **Create New**. Alternatively, you can select an existing resource group, but this can cause conflicts if resources are already deployed in it.
 
 1. Specify and check the defaults for these resource parameters:
 
 | Parameter label | Description |
 | --------------- | ----------- |
-| **Vm Size** | The Azure instance type to use for the VM. See https://docs.microsoft.com/en-us/azure/virtual-machines/sizes for a list of instance types. |
+| **Vm Size** | The Azure instance type to use for the VM. For a list of instance types, see [Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes). |
 | **Client IP Addresses** | The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value &lt;your_public_ip_address&gt;/32 to restrict access to only your computer. |
 | **Admin Username** | Admin username for the VM running MATLAB. To avoid any deployment errors, check the list of [disallowed values](https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/create-or-update?tabs=HTTP#osprofile) for adminUsername. |
 | **Admin Password** | Choose the password for the admin username. This password is required when logging in remotely to the instance. For the deployment to succeed, your password must meet [Azure's password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-). |
@@ -46,7 +48,7 @@ Clicking the Deploy to Azure button opens the "Custom deployment" page in your b
 | **Auto Shutdown** | Select the duration after which the VM should be automatically shut down post launch. |
 | **Access Protocol** | Access protocol to connect to this VM. Selecting 'NICE DCV' will enable [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection. |
 | **NICE DCV License Server** | If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license. |
-| **MATLAB License Server** | Optional License Manager for MATLAB, specified as a string in the form port@hostname. If not specified, online licensing is used. If specified, the license manager must be accessible from the specified virtual network and subnets. For more information, see https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure. |
+| **MATLAB License Server** | Optional License Manager for MATLAB, specified as a string in the form port@hostname. If you do not provide this string, MATLAB uses online licensing. If you provide this string, ensure that the license manager is accessible from the specified virtual network and subnets. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure). |
 | **Optional User Command** | Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e "export CLOUD=AZURE" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh "https://example.com/script.sh" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'. |
 
 
@@ -76,9 +78,25 @@ Clicking the Deploy to Azure button opens the "Custom deployment" page in your b
 
 ## Step 4. Start MATLAB
 
-Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The first time you start MATLAB, you need to enter your MathWorks Account credentials to license MATLAB. For other ways to license MATLAB, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html). 
+Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The first time you start MATLAB, you need to enter your MathWorks&reg; Account credentials to license MATLAB. For other ways to license MATLAB, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html). 
 
 >**Note**: It may take up to a minute for MATLAB to start the first time.
+
+# Deploy Your Own Machine Image
+For details of the scripts which form the basis of the MathWorks Linux VHD build process,
+see [Build Your Own Machine Image](https://github.com/mathworks-ref-arch/matlab-on-azure/blob/master/packer/v1/README.md).
+You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure.
+You can then deploy this custom image with the following MathWorks infrastructure as code (IaC) templates.
+| Create Virtual Network for Custom Image | Use Existing Virtual Network for Custom Image|
+| --- | --- |
+| Use this option to deploy the custom image and other resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-R2022b-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the custom image and other resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2022b%2Fazuredeploy-existing-vnet-R2022b-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
+
+To launch a custom image, the following fields are required by these templates.
+| Argument Name | Description |
+|---|---|
+|`Custom VHD`                 | URL of custom VHD. This is the `artifact_id` listed in the `manifest.json`. |
+|`Custom VHD Storage Account` | Storage account that contains the custom VHD. This is the storage account that was specified in the Packer build using the `STORAGE_ACCOUNT` parameter. |
+|`Custom VHD Resource Group`  | Resource group that contains the custom VHD. This is the resource group that was specified in the Packer build using the `RESOURCE_GROUP_NAME` parameter. |
 
 # Additional Information
 
@@ -125,6 +143,6 @@ If your resource group fails to deploy, check the Deployments section of the Res
 
 ----
 
-Copyright (c) 2018-2023 The MathWorks, Inc. All rights reserved.
+Copyright 2018-2024 The MathWorks, Inc.
 
 ----
