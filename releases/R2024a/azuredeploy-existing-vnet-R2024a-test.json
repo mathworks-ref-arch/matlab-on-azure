@@ -163,7 +163,6 @@
             "",
             "# Run startup scripts",
             "mkdir -p /var/log/mathworks",
-            "sudo update-icon-caches /usr/share/icons/*",
             "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1"
         ],
         "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
@@ -203,7 +202,7 @@
     "resources": [
         {
             "type": "Microsoft.Network/virtualNetworks",
-            "apiVersion": "2022-07-01",
+            "apiVersion": "2023-06-01",
             "name": "[variables('virtualNetworkName')]",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
@@ -225,7 +224,7 @@
         {
             "name": "[variables('networkSecurityGroupName')]",
             "type": "Microsoft.Network/networkSecurityGroups",
-            "apiVersion": "2022-07-01",
+            "apiVersion": "2023-06-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "properties": {
@@ -275,7 +274,7 @@
         {
             "name": "[variables('publicIp')]",
             "type": "Microsoft.Network/publicIPAddresses",
-            "apiVersion": "2022-07-01",
+            "apiVersion": "2023-06-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "properties": {
@@ -289,7 +288,7 @@
         {
             "name": "[variables('nicName')]",
             "type": "Microsoft.Network/networkInterfaces",
-            "apiVersion": "2022-07-01",
+            "apiVersion": "2023-06-01",
             "location": "[variables('location')]",
             "tags": "[variables('tagsForAll')]",
             "dependsOn": [
@@ -393,7 +392,7 @@
         {
             "type": "Microsoft.Resources/deployments",
             "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
-            "apiVersion": "2022-09-01",
+            "apiVersion": "2023-07-01",
             "properties": {
                 "mode": "Incremental",
                 "template": {
@@ -406,7 +405,7 @@
         {
             "name": "[variables('functionAppName')]",
             "type": "Microsoft.Web/sites",
-            "apiVersion": "2022-03-01",
+            "apiVersion": "2023-01-01",
             "location": "[variables('location')]",
             "kind": "functionapp",
             "identity": {
@@ -429,7 +428,7 @@
                         },
                         {
                             "name": "AzureWebJobsStorage",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2022-09-01').keys[0].value)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-04-01').keys[0].value)]"
                         },
                         {
                             "name": "FUNCTIONS_EXTENSION_VERSION",
@@ -437,7 +436,7 @@
                         },
                         {
                             "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
-                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2022-09-01').keys[0].value)]"
+                            "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2023-04-01').keys[0].value)]"
                         },
                         {
                             "name": "PROJECT",
@@ -456,7 +455,7 @@
             },
             "resources": [
                 {
-                    "apiVersion": "2022-03-01",
+                    "apiVersion": "2023-01-01",
                     "name": "web",
                     "type": "sourcecontrols",
                     "dependsOn": [
@@ -506,7 +505,7 @@
             "properties": {
                 "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
                 "principalType": "ServicePrincipal",
-                "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2022-03-01', 'Full').identity.principalId]",
+                "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId]",
                 "scope": "[resourceGroup().id]"
             }
         },
