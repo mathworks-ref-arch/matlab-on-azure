@@ -23,11 +23,11 @@ Click the **Deploy to Azure** button below to deploy the cloud resources on Azur
 
 | Create Virtual Network | Use Existing Virtual Network |
 | --- | --- |
-| Use this option to deploy the resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Freftemplatestorage.blob.core.windows.net%2Fmatlablinux%2F94ce5449-3f73-b98b-e7fe-f1f6cb66be2a%2Fazuredeploy-R2024a-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Freftemplatestorage.blob.core.windows.net%2Fmatlablinux%2F94ce5449-3f73-b98b-e7fe-f1f6cb66be2a%2Fazuredeploy-existing-vnet-R2024a-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
+| Use this option to deploy the resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Freftemplatestorage.blob.core.windows.net%2Fmatlablinux%2F94ce5449-3f73-b98b-e7fe-f1f6cb66be2a%2Fazuredeploy-R2024a.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Freftemplatestorage.blob.core.windows.net%2Fmatlablinux%2F94ce5449-3f73-b98b-e7fe-f1f6cb66be2a%2Fazuredeploy-existing-vnet-R2024a.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
 
 > VM Platform: Ubuntu 22.04
   
-> MATLAB&reg; Release: R2024a-test
+> MATLAB&reg; Release: R2024a
 
 To deploy a custom machine image, see [Deploy Your Own Machine Image](#deploy-your-own-machine-image).
 
