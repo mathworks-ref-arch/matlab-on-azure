@@ -1,4 +1,13 @@
-# Copyright 2023-2024 The MathWorks, Inc.
+# Copyright 2023-2025 The MathWorks, Inc.
+
+packer {
+  required_plugins {
+    azure = {
+      source = "github.com/hashicorp/azure"
+      version = "~> 2"
+    }
+  }
+}
 
 # The following variables may have different values across MATLAB releases.
 # MathWorks recommends that you modify them via the configuration file specific to each release.
@@ -19,7 +28,7 @@ variable "SPKGS" {
 
 variable "RELEASE" {
   type        = string
-  default     = "R2024a"
+  default     = "R2024b"
   description = "Target MATLAB release to install in the machine image, must start with \"R\"."
 
   validation {
@@ -30,19 +39,19 @@ variable "RELEASE" {
 
 variable "BUILD_SCRIPTS" {
   type        = list(string)
-  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "install-support-packages.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
+  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-proxy.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "install-support-packages.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
   description = "The list of installation scripts Packer will use when building the image."
 }
 
 variable "STARTUP_SCRIPTS" {
   type        = list(string)
-  default     = [".env", "10_setup-machine.sh", "20_install-nicedcv.sh", "30_setup-rdp.sh", "40_setup-nicedcv.sh", "50_setup-matlab.sh", "80_warmup-matlab.sh", "85_warmup-mathworks-service-host.sh", "90_run-optional-user-command.sh"]
+  default     = [".env", "10_setup-machine.sh", "20_install-nicedcv.sh", "30_setup-rdp.sh", "40_setup-nicedcv.sh", "50_setup-matlab-proxy.sh", "60_setup-matlab.sh", "80_warmup-matlab.sh", "85_warmup-mathworks-service-host.sh", "90_run-optional-user-command.sh"]
   description = "The list of startup scripts Packer will copy to the remote machine image build, which can be used during the deployment creation."
 }
 
 variable "RUNTIME_SCRIPTS" {
   type        = list(string)
-  default     = ["swap-desktop-solution.sh"]
+  default     = ["swap-desktop-solution.sh", "launch-matlab-proxy.sh"]
   description = "The list of runtime scripts Packer will copy to the remote machine image builder, which can be used after the ARM template Stack creation."
 }
 
@@ -50,6 +59,12 @@ variable "DCV_INSTALLER_URL" {
   type        = string
   default     = "https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15065-ubuntu2204-x86_64.tgz"
   description = "The URL to install NICE DCV, a remote display protocol to use."
+}
+
+variable "MATLAB_PROXY_VERSION" {
+  type        = string
+  default     = ""
+  description = "The version of matlab-proxy to install. Installs the latest version by default."
 }
 
 variable "NVIDIA_DRIVER_VERSION" {
@@ -85,31 +100,31 @@ variable "SPKG_SOURCE_LOCATION" {
 variable "CLIENT_ID" {
   type        = string
   description = "The Microsoft Entra ID service principal associated with your builder."
+  sensitive   = true
 }
 
 variable "CLIENT_SECRET" {
   type        = string
   description = "The password or secret for your service principal."
+  sensitive   = true
 }
 
 variable "RESOURCE_GROUP_NAME" {
   type        = string
+  default     = ""
   description = "Resource group under which the final artifact will be stored"
-}
-
-variable "STORAGE_ACCOUNT" {
-  type        = string
-  description = "Storage account under which the final artifact will be stored."
 }
 
 variable "SUBSCRIPTION_ID" {
   type        = string
   description = "Subscription under which the build will be performed."
+  sensitive   = true
 }
 
 variable "TENANT_ID" {
   type        = string
   description = "The Microsoft Entra ID tenant identifier with which your client_id and subscription_id are associated."
+  sensitive   = true
 }
 
 variable "AZURE_TAGS" {
@@ -156,16 +171,19 @@ variable "USER_ASSIGNED_MANAGED_IDENTITIES" {
   type        = list(string)
   default     = []
   description = "Optional list of resource IDs of user-assigned managed identities to assign to the Packer builder Virtual Machine."
+  sensitive   = true
 }
 
 variable "AZURE_KEY_VAULT" {
   type        = string
   default     = ""
   description = "(Optional) Name of an Azure Key vault containing secrets to be used during the Packer build."
+  sensitive   = true
 }
 
 # Set up local variables used by provisioners.
 locals {
+  image_uuid      = uuidv4()
   timestamp       = regex_replace(timestamp(), "[- TZ:]", "")
   build_scripts   = [for s in var.BUILD_SCRIPTS : format("build/%s", s)]
   startup_scripts = [for s in var.STARTUP_SCRIPTS : format("startup/%s", s)]
@@ -173,29 +191,27 @@ locals {
 }
 
 # Configure the AZURE instance that is used to build the machine image.
-source "azure-arm" "VHD_Builder" {
-  client_id                        = "${var.CLIENT_ID}"
-  client_secret                    = "${var.CLIENT_SECRET}"
-  resource_group_name              = "${var.RESOURCE_GROUP_NAME}"
-  storage_account                  = "${var.STORAGE_ACCOUNT}"
-  subscription_id                  = "${var.SUBSCRIPTION_ID}"
-  tenant_id                        = "${var.TENANT_ID}"
-  capture_container_name           = "images"
-  capture_name_prefix              = "ml-ubuntu--image-${var.RELEASE}"
-  os_type                          = "Linux"
-  image_publisher                  = "${var.IMAGE_PUBLISHER}"
-  image_offer                      = "${var.IMAGE_OFFER}"
-  image_sku                        = "${var.IMAGE_SKU}"
-  azure_tags                       = "${var.AZURE_TAGS}"
-  location                         = "East US"
-  vm_size                          = "${var.VM_SIZE}"
-  os_disk_size_gb                  = "128"
-  user_assigned_managed_identities = "${var.USER_ASSIGNED_MANAGED_IDENTITIES}"
+source "azure-arm" "Image_Builder" {
+  client_id                         = "${var.CLIENT_ID}"
+  client_secret                     = "${var.CLIENT_SECRET}"
+  managed_image_resource_group_name = "${var.RESOURCE_GROUP_NAME}"
+  managed_image_name                = "ml-ubuntu--image-${var.RELEASE}-${local.image_uuid}"
+  subscription_id                   = "${var.SUBSCRIPTION_ID}"
+  tenant_id                         = "${var.TENANT_ID}"
+  os_type                           = "Linux"
+  image_publisher                   = "${var.IMAGE_PUBLISHER}"
+  image_offer                       = "${var.IMAGE_OFFER}"
+  image_sku                         = "${var.IMAGE_SKU}"
+  azure_tags                        = "${var.AZURE_TAGS}"
+  location                          = "East US"
+  vm_size                           = "${var.VM_SIZE}"
+  os_disk_size_gb                   = "128"
+  user_assigned_managed_identities  = "${var.USER_ASSIGNED_MANAGED_IDENTITIES}"
 }
 
 # Build the machine image.
 build {
-  sources = ["source.azure-arm.VHD_Builder"]
+  sources = ["source.azure-arm.Image_Builder"]
 
   provisioner "shell" {
     inline = ["/usr/bin/cloud-init status --wait"]
@@ -225,6 +241,7 @@ build {
       "RELEASE=${var.RELEASE}",
       "SPKGS=${var.SPKGS}",
       "PRODUCTS=${var.PRODUCTS}",
+      "MATLAB_PROXY_VERSION=${var.MATLAB_PROXY_VERSION}",
       "DCV_INSTALLER_URL=${var.DCV_INSTALLER_URL}",
       "NVIDIA_DRIVER_VERSION=${var.NVIDIA_DRIVER_VERSION}",
       "NVIDIA_CUDA_TOOLKIT=${var.NVIDIA_CUDA_TOOLKIT}",
@@ -247,12 +264,11 @@ build {
     output     = "${var.MANIFEST_OUTPUT_FILE}"
     strip_path = true
     custom_data = {
-      release             = "MATLAB ${var.RELEASE}"
-      specified_products  = "${var.PRODUCTS}"
-      specified_spkgs     = "${var.SPKGS}"
-      build_scripts       = join(", ", "${var.BUILD_SCRIPTS}")
-      storage_account     = "${var.STORAGE_ACCOUNT}"
-      resource_group_name = "${var.RESOURCE_GROUP_NAME}"
+      release                           = "MATLAB ${var.RELEASE}"
+      specified_products                = "${var.PRODUCTS}"
+      specified_spkgs                   = "${var.SPKGS}"
+      build_scripts                     = join(", ", "${var.BUILD_SCRIPTS}")
+      managed_image_resource_group_name = "${var.RESOURCE_GROUP_NAME}"
     }
   }
 }

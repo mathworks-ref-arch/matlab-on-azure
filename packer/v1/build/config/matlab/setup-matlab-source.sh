@@ -9,8 +9,9 @@
 # To unmount: ./setup-matlab-source.sh unmount <FILE_SHARE_NAME>
 # Copyright 2024 The MathWorks Inc.
 
-# Exit on any failure
+# Exit on any failure, treat unset substitution variables as errors
 set -eo pipefail
+
 
 # Input arguments
 ACTION=$1

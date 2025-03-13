@@ -50,6 +50,7 @@ Clicking the **Deploy to Azure** button opens the "Custom deployment" page in yo
 | **NICE DCV License Server** | If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license. |
 | **MATLAB License Server** | Optional License Manager for MATLAB, specified as a string in the form port@hostname. If you do not provide this string, MATLAB uses online licensing. If you provide this string, ensure that the license manager is accessible from the specified virtual network and subnets. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure). |
 | **Optional User Command** | Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e "export CLOUD=AZURE" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh "https://example.com/script.sh" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'. |
+| **Image ID** | Optional Resource ID of a custom managed image in the target region. To use a prebuilt MathWorks image instead, leave this field empty. If you customize the build, for example by removing or modifying the included scripts, this can make the image incompatible with the provided ARM template. To ensure compatibility, modify the ARM template or image accordingly. |
 
 
 **NOTE**: If you are using network license manager, the port and hostname of the network license manager must be reachable from the MATLAB VMs. It is therefore recommended that you deploy into a subnet within the same virtual network as the network license manager.
@@ -78,25 +79,20 @@ Clicking the **Deploy to Azure** button opens the "Custom deployment" page in yo
 
 ## Step 4. Start MATLAB
 
-Double-click the MATLAB icon on the virtual machine desktop to start MATLAB. The first time you start MATLAB, you need to enter your MathWorks&reg; Account credentials to license MATLAB. For other ways to license MATLAB, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html). 
+To start MATLAB, double click the MATLAB icon on the desktop in your virtual machine. The first time you start MATLAB, you need to enter your MathWorks Account credentials. For more information about licensing MATLAB, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html). 
 
 >**Note**: It may take up to a minute for MATLAB to start the first time.
 
 # Deploy Your Own Machine Image
-For details of the scripts which form the basis of the MathWorks Linux VHD build process,
+For details of the scripts which form the basis of the MathWorks Linux managed image build process,
 see [Build Your Own Machine Image](https://github.com/mathworks-ref-arch/matlab-on-azure/blob/master/packer/v1/README.md).
 You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure.
-You can then deploy this custom image with the following MathWorks infrastructure as code (IaC) templates.
-| Create Virtual Network for Custom Image | Use Existing Virtual Network for Custom Image|
-| --- | --- |
-| Use this option to deploy the custom image and other resources in a new virtual network<br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2023b%2Fazuredeploy-R2023b-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> | Use this option to deploy the custom image and other resources in an existing virtual network <br><br><a href="https://portal.azure.com/#create/Microsoft.Template/uri/https%3A%2F%2Fraw.githubusercontent.com%2Fmathworks-ref-arch%2Fmatlab-on-azure%2Fmaster%2Freleases%2FR2023b%2Fazuredeploy-existing-vnet-R2023b-test.json" target="_blank"><img src="https://aka.ms/deploytoazurebutton"/></a></br></br> |
+You can then deploy this custom image with the above MathWorks infrastructure as code (IaC) templates.
 
-To launch a custom image, the following fields are required by these templates.
+To launch a custom image, the following fields are required by the templates.
 | Argument Name | Description |
 |---|---|
-|`Custom VHD`                 | URL of custom VHD. This is the `artifact_id` listed in the `manifest.json`. |
-|`Custom VHD Storage Account` | Storage account that contains the custom VHD. This is the storage account that was specified in the Packer build using the `STORAGE_ACCOUNT` parameter. |
-|`Custom VHD Resource Group`  | Resource group that contains the custom VHD. This is the resource group that was specified in the Packer build using the `RESOURCE_GROUP_NAME` parameter. |
+|`Image ID` | Resource ID of the custom managed image. This is the `artifact_id` listed in the `manifest.json`. |
 
 # Additional Information
 
@@ -143,6 +139,6 @@ If your resource group fails to deploy, check the Deployments section of the Res
 
 ----
 
-Copyright 2018-2024 The MathWorks, Inc.
+Copyright 2018-2025 The MathWorks, Inc.
 
 ----

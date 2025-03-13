@@ -27,7 +27,7 @@
       "type": "securestring",
       "defaultValue": "",
       "metadata": {
-        "description": "Choose the password for the admin username. This password is required when logging in remotely to the instance. For the deployment to succeed, your password must meet [Azure's password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)."
+        "description": "Choose the password for the admin username. You need this password to log in remotely to the instance. Your password must meet the [Azure password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)."
       }
     },
     "virtualNetworkResourceID": {
@@ -107,6 +107,13 @@
       "metadata": {
         "description": "Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e \"export CLOUD=AZURE\" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh \"https://example.com/script.sh\" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'."
       }
+    },
+    "imageID": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional Resource ID of a custom managed image in the target region. To use a prebuilt MathWorks image instead, leave this field empty. If you customize the build, for example by removing or modifying the included scripts, this can make the image incompatible with the provided ARM template. To ensure compatibility, modify the ARM template or image accordingly."
+      }
     }
   },
   "variables": {
@@ -160,7 +167,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2022b-vm-linux-sku",
-    "version": "1.0.9",
+    "version": "1.0.12",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
@@ -171,6 +178,9 @@
       "name": "[variables('sku')]",
       "publisher": "[variables('publisher')]",
       "product": "[variables('offer')]"
+    },
+    "imageResourceID": {
+      "id": "[parameters('imageID')]"
     },
     "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
     "runtimeStack": "powershell",
@@ -300,15 +310,11 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2022-11-01",
+      "apiVersion": "2023-09-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "name": "[variables('vmName')]",
-      "plan": {
-        "name": "[variables('sku')]",
-        "publisher": "[variables('publisher')]",
-        "product": "[variables('offer')]"
-      },
+      "plan": "[if(empty(parameters('imageId')), variables('plan') , null())]",
       "dependsOn": [
         "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
       ],
@@ -317,12 +323,7 @@
           "VmSize": "[parameters('vmSize')]"
         },
         "storageProfile": {
-          "imageReference": {
-            "publisher": "[variables('publisher')]",
-            "offer": "[variables('offer')]",
-            "sku": "[variables('sku')]",
-            "version": "[variables('version')]"
-          },
+          "imageReference": "[if(empty(parameters('imageId')), variables('imageReference'), variables('imageResourceID'))]",
           "osDisk": {
             "createOption": "FromImage",
             "managedDisk": {
@@ -356,7 +357,7 @@
           "name": "startup",
           "type": "extensions",
           "location": "[variables('location')]",
-          "apiVersion": "2022-11-01",
+          "apiVersion": "2023-09-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],
