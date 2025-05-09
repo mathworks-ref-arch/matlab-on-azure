@@ -25,6 +25,7 @@ To view instructions for deploying the MATLAB reference architecture, select a M
 
 | Linux | Windows |
 | ----- | ------- |
+| [R2025a](releases/R2025a/README.md) | [R2025a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025a/README.md) |
 | [R2024b](releases/R2024b/README.md) | [R2024b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024b/README.md) |
 | [R2024a](releases/R2024a/README.md) | [R2024a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024a/README.md) |
 | [R2023b](releases/R2023b/README.md) | [R2023b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2023b/README.md) |
@@ -49,7 +50,7 @@ For details of the scripts which form the basis of the MathWorks Linux reference
 see [Build Your Own Machine Image](./packer/v1).
 You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure,
 which you can deploy with the MathWorks infrastructure as code (IaC) templates.
-To launch the built image, see [Deploy Your Own Machine Image](releases/R2024b/README.md#deploy-your-own-machine-image).
+To launch the built image, see [Deploy Your Own Machine Image](releases/R2025a/README.md#deploy-your-own-machine-image).
 
 # Learn about Architecture
 Deploying this reference architecture will create several resources in your resource group.
@@ -99,7 +100,7 @@ Alternatively, you can customize an image by launching the reference architectur
 For more information, see [Create an image of a VM in the portal](https://learn.microsoft.com/en-us/azure/virtual-machines/capture-image-portal) in the Azure documentation.
 
 ### How do I use a different license manager?
-The VM image uses MathWorks Hosted License Manager by default. For information on using other license managers, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/licensingoncloud/matlab-on-the-cloud.html).
+The VM image uses MathWorks Hosted License Manager by default. For information on using other license managers, see [MATLAB Licensing in the Cloud](https://www.mathworks.com/help/install/license/licensing-for-mathworks-products-running-on-the-cloud.html).
 
 ### How do I deploy into an existing virtual network?
 You need to edit the template and replace the appropriate sections with your own virtual network and subnet resource IDs.
@@ -109,6 +110,6 @@ To request assistance or additional features, contact [MathWorks Technical Suppo
 
 ----
 
-Copyright 2018-2024 The MathWorks, Inc.
+Copyright 2018-2025 The MathWorks, Inc.
 
 ----

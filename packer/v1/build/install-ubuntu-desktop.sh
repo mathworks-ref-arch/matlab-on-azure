@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2023-2024 The MathWorks, Inc.
+# Copyright 2023-2025 The MathWorks, Inc.
 
 # Exit on any failure, treat unset substitution variables as errors
 set -euo pipefail
@@ -158,7 +158,7 @@ sudo apt-get -qq install "linux-headers-$(uname -r)"
 
 # Installing NVDIA driver
 if [[ -n "${NVIDIA_DRIVER_VERSION}" ]]; then
-  sudo apt-get -qq install --no-install-recommends "nvidia-driver-${NVIDIA_DRIVER_VERSION}"
+  sudo apt-get -qq install --no-install-recommends "nvidia-driver-${NVIDIA_DRIVER_VERSION}-server"
 fi
 
 sudo cp /var/tmp/config/nvidia/xorg.conf /etc/X11/xorg.conf

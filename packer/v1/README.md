@@ -92,9 +92,8 @@ packer build -var="PRODUCTS=MATLAB Deep_Learning_Toolbox" build-azure-matlab.pkr
 Packer installs products using MATLAB Package Manager (mpm). For more information, see [MATLAB Package Manager (mpm)](https://github.com/mathworks-ref-arch/matlab-dockerfile/blob/main/MPM.md). 
 
 ### **Customize MATLAB Release to Install**
-By default the Packer build uses the latest MATLAB release.
-To install an earlier MATLAB release, use one of the variable definition files in the [release-config](./release-config) folder.
-These are available for MATLAB R2020a and later.
+By default, the Packer build uses the latest MATLAB release. To install an earlier MATLAB release, use one of the variable definition files in the [release-config](./release-config) folder. Note that although the files are available for MATLAB R2020a and later, MathWorks recommends using MATLAB R2023a or later. This is because the Packer builds for earlier releases use Ubuntu 20.04, which is no longer receiving security updates.
+
 The following examples assume Azure authentication and storage details have been set in `build-azure-matlab.pkr.hcl`, or added to the `var-file`.
 
 For example, install MATLAB R2020a and all available toolboxes.
