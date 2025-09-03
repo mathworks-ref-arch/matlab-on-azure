@@ -1,20 +1,12 @@
-# Copyright 2022 The MathWorks, Inc.
+# Copyright 2022-2025 The MathWorks, Inc.
 
 # Input bindings are passed in via param block.
 param($Timer)
 
 $ErrorActionPreference = "Stop"
 
-# The required parameters are fed in from the ARM template as environment variables
-$ResourceGroup = ${env:RESOURCE_GROUP_NAME}
-$NumberOfHoursBeforeShutdown = ${env:HOURS_BEFORE_SHUTDOWN}
-
-# Retrieve the VM name
-$VM = Get-AzVM -Status | Where-Object {$_.ResourceGroupName -eq $ResourceGroup}
-$CurrentSub = (Get-AzContext).Subscription.Id
-$VMName = $VM.Name
-
-# Messages to be logged are defined here
+# Define constants used throughout the program
+# Messages to be logged
 $LogMessages = @{
     instanceStopped =  "Instance is stopped."
     tagNever = "Autoshutdown is not enabled. Change the value of mw-autoshutdown tag of the VM instance to enable the autoshutdown feature."
@@ -23,10 +15,40 @@ $LogMessages = @{
     readyForShutdown = "Shutdown time has been reached. Shutting instance down."
     tooEarlyToShutdown = "Shutdown time has not been reached yet. Too early to shutdown instance."
     inbuiltScheduleActive = "An Azure DevTest Labs auto-shutdown schedule is already active for this VM instance. Please disable it and set shut-down time in the mw-autoshutdown tag attached to the matlab-vm to enable auto-shutdown using this app."  
-    }
+}
+
+# Tag on the VM that dictates the shutdown behaviour
+$TagToTrack = "mw-autoshutdown"
+
+# Tag that depicts a user-defined shutdown is active for the instance
+$UserDefinedShutdownTag = "user-managed-shutdown"
+
+# Valid Tag Values
+$TagNeverValue = 'never'
+$ValidTimeStampFormat = 'ddd, dd MMM yyyy HH:mm:ss'
+
+# The required parameters are fed in from the ARM template as environment variables
+$ResourceGroup = ${env:RESOURCE_GROUP_NAME}
+$NumberOfHoursBeforeShutdown = ${env:HOURS_BEFORE_SHUTDOWN}
+
+# Normalize variable
+if ($NumberOfHoursBeforeShutdown -eq 'Never') {
+    $NumberOfHoursBeforeShutdown = $TagNeverValue
+}
+
+$VMName = ${env:INSTANCE_NAME}
+
+# Retrieve VM information, contains information about instance tags, instance ID
+$VM = Get-AzVM -Name "$VMName" -ResourceGroupName "$ResourceGroup"
+
+# Retrieve VM instance view, contains information about Power state and last provisioning timestamp
+$VMInstanceView = Get-AzVM -Name "$VMName" -ResourceGroupName "$ResourceGroup" -Status
+
+# Retrieve Subscription ID
+$CurrentSub = (Get-AzContext).Subscription.Id
 
 # Helper function to print information
-function LogInformation {
+function Write-Information {
     param(
         [Parameter (Mandatory = $True)] [String] $MessageToLog
     )
@@ -34,36 +56,37 @@ function LogInformation {
 }
 
 function GetStartTime {
-    # This function utilizes the app's permissions over the resource group to generate token in order to fetch the boot time of the VM
-    $TokenResponse = Get-AzAccessToken -ResourceUrl "https://management.azure.com" 
-    $AccessToken = $TokenResponse.Token
-    $AzureUrl = "https://management.azure.com/subscriptions/{0}/resourceGroups/{1}/providers/Microsoft.Compute/virtualMachines/{2}/instanceView?api-version=2017-03-30" -f $CurrentSub, $ResourceGroup, $VMName  
-    $Response =  Invoke-RestMethod -Method GET -Uri $AzureUrl -Headers @{ Authorization= "Bearer $AccessToken"}
-    $BootTime = $Null
-    if ($response) {
-        $BootTime = [String] $Response.statuses.time
-        $BootTime = [Datetime] $BootTime
+    <# Gets the VM's start time #>
+    $BootTime = $null
+
+    if ($VMInstanceView.Statuses) {
+        # Find the most recent status with a Time property (if any)
+        $StatusWithTime = $VMInstanceView.Statuses | Where-Object { $_.Time } | Sort-Object Time -Descending | Select-Object -First 1
+        if ($StatusWithTime) {
+            $BootTime = [datetime]$StatusWithTime.Time
+        }
     }
+
     return $BootTime
 }
 
 # Retrieve the shutdown tag's value
-function GetShutDownTag {
-    $InstanceTags = $VM.tags."mw-autoshutdown"
+function Get-ShutDownTag {
+    $InstanceTags = $VM.tags.$TagToTrack
     return $InstanceTags
 }
 
 # Set the calculated value for shutdown
-function SetShutDownTag {
+function Set-ShutDownTag {
     param(
-        [Parameter (Mandatory = $True)] [String] $ShutDownTime
+        [Parameter (Mandatory = $True)] [String] $TagValue
     )
-    $Tag = @{"mw-autoshutdown" = $ShutDownTime}
+    $Tag = @{$TagToTrack = $TagValue}
     Update-AzTag -Tag $Tag -ResourceId $VM.Id -Operation Merge | Out-Null
 }
 
 # Calculate the shut down time for the VM
-function SetShutDownTime {
+function Set-ShutDownTime {
     # Regex that extracts the integer value provided from the "AutoShutdown" parameter
     $TimeIntervalBeforeShutdown = $NumberOfHoursBeforeShutdown -replace "[^0-9]",''
     $LaunchTime = GetStartTime
@@ -71,13 +94,13 @@ function SetShutDownTime {
         # Add the number of hours post launch 
         $ShutDownTime = $LaunchTime.AddHours($TimeIntervalBeforeShutdown)
         #Convert the DateTime object to the recommended format
-        $ShutDownTime = $ShutDownTime.ToString('ddd, dd MMM yyyy HH:mm:ss') + " GMT"
-        SetShutDownTag($ShutDownTime)
+        $ShutDownTime = $ShutDownTime.ToString($ValidTimeStampFormat) + " GMT"
+        Set-ShutDownTag -TagValue $ShutDownTime
     }
 }
 
 # Set the value of last autoshutdown triggered by the function app
-function SetLastAutoshutdownEventTag {
+function Set-LastAutoshutdownEventTag {
     param(
         [Parameter (Mandatory = $True)] [String] $LastShutDownTime
     )
@@ -85,13 +108,23 @@ function SetLastAutoshutdownEventTag {
     Update-AzTag -Tag $Tag -ResourceId $VM.Id -Operation Merge | Out-Null
 }
 
-# Check if the instance is stopped, if yes, then return
+# Check if the instance is stopped
 function IsInstanceStopped {
-    $status = $VM.PowerState
-    if ($status -eq "VM deallocated"){
-        return $True
+    # List of stopped/stopping/deallocating states
+    $stoppedStates = @(
+        "VM deallocated",
+        "VM stopped",
+        "VM stopping",
+        "VM deallocating"
+    )
+
+    # Find the PowerState status
+    $PowerStateStatus = $VMInstanceView.Statuses | Where-Object { $_.Code -like "*PowerState*" } | Select-Object -First 1
+
+    if ($PowerStateStatus -and $PowerStateStatus.DisplayStatus -in $stoppedStates) {
+        return $true
     }
-    return $False
+    return $false
 }
 
 # Helper function to retrieve information about active in-built auto-shutdown schedule
@@ -134,7 +167,7 @@ function getDevTestLabsSchedule {
 
         # Convert the auto-shutdown date-time to GMT and change it to RFC 1123 UTC timestamp format
         $AutoShutDownDateTime = [System.TimeZoneInfo]::ConvertTimeBySystemTimeZoneId($AutoShutDownDateTime, $TimeZoneId, "UTC");
-        $AutoShutDownDateTime = $AutoShutDownDateTime.ToString('ddd, dd MMM yyyy HH:mm:ss') + " GMT"
+        $AutoShutDownDateTime = $AutoShutDownDateTime.ToString($ValidTimeStampFormat) + " GMT"
 
         return $AutoShutDownDateTime
     }
@@ -142,16 +175,10 @@ function getDevTestLabsSchedule {
     return $null
 }
 
-function main {
-    # If instance is stopped, no action required
-    if (IsInstanceStopped){
-        LogInformation("instanceStopped")
-        return
-    }
-
-    # Else, retrieve information about in-built auto-shutdown schedule
+function Set-UserManagedShutdownTag {
+    # Retrieve information about in-built auto-shutdown schedule
     $AutoShutDownDateTime = getDevTestLabsSchedule
-    $Tag = $VM.tags."user-managed-shutdown"
+    $Tag = $VM.tags.$UserDefinedShutdownTag
 
     if ($AutoShutDownDateTime){
         <# 
@@ -160,83 +187,101 @@ function main {
         #>
         if (!$Tag -or ($Tag -eq "False")){
             <# 
-            If tag does not exists or is set to False, then add it to the VM with value as "True"
+            If tag does not exists or is set to False (which can happen if user set the devtestlab schedule after VM deployment), 
+            then add it to the VM with value as "True"
             #>
-            $TagValue = @{"user-managed-shutdown" = "True"}
+            $TagValue = @{$UserDefinedShutdownTag = "True"}
             Update-AzTag -Tag $TagValue -ResourceId $VM.Id -Operation Merge | Out-Null
         }
-        SetShutDownTag($AutoShutDownDateTime)
-        LogInformation("inbuiltScheduleActive")
+        Set-ShutDownTag -TagValue $AutoShutDownDateTime
+        Write-Information -MessageToLog "inbuiltScheduleActive"
+        return $true
+    }
+
+    # If in-built auto-shutdown is not active and the user-managed-shutdown tag is 'True' or non-existent, set it to False
+    if ($Tag -ne "False"){
+        $TagValue = @{$UserDefinedShutdownTag = "False"}
+        Update-AzTag -Tag $TagValue -ResourceId $VM.Id -Operation Merge | Out-Null
+    }
+
+    return $false
+}
+
+function main {
+    # If instance is stopped, no action required
+    if (IsInstanceStopped){
+        Write-Information -MessageToLog "instanceStopped"
         return
     }
 
-    # If in-built auto-shutdown is not active and the user-managed-shutdown tag is 'True' or non-existent, set it to true
-    if ($Tag -ne "False"){
-        $TagValue = @{"user-managed-shutdown" = "False"}
-        Update-AzTag -Tag $TagValue -ResourceId $VM.Id -Operation Merge | Out-Null
+    # Validate if the instance already has an Azure DevTest Labs auto-shutdown schedule
+    $UserManagedScheduleActive = Set-UserManagedShutdownTag
+
+    # If yes, no action needed by the app
+    if ($UserManagedScheduleActive) {
+        return
     }
-    
-    # Once in-built auto-shutdown is handled, retrieve mw-autoshutdown tag
-    $ShutDownTag = GetShutDownTag
+
+    # Retrieve mw-autoshutdown tag
+    $ShutDownTag = Get-ShutDownTag
 
     # Initialize the mw-autoshutdown tag according to user's choice for shut down
-    if (!$ShutDownTag){
+    if (-not $ShutDownTag){
         <# if tag doesn't exists, then it means this is the first function app execution or the tag has been explicitly deleted
          in such cases, create the tag and attach it to the VM #>
-        if ($NumberOfHoursBeforeShutdown -eq "Never"){
-            SetShutDownTag("never")
-            LogInformation("tagNever")
+        if ($NumberOfHoursBeforeShutdown -eq $TagNeverValue){
+            Set-ShutDownTag -TagValue $TagNeverValue
+            Write-Information -MessageToLog "tagNever"
             return
         }
-        else {
-            # Calculate the shut down time according user input
-            SetShutDownTime
-            LogInformation("instanceJustBooted")
-            return
-        }
+        
+        # Calculate the shut down time according user input
+        Set-ShutDownTime
+        Write-Information -MessageToLog "instanceJustBooted"
+        return
     }
 
     # This is to check the status of the mw-autoshutdown tag in subsequent runs
     if ($ShutDownTag -eq "change_me_on_boot"){
         # This tag value reflects that the VM was shutdown by the app in a previous run
-        SetShutDownTime
-        LogInformation("instanceJustBooted")
+        Set-ShutDownTime
+        Write-Information -MessageToLog "instanceJustBooted"
     }
-    elseif ($ShutDownTag -eq "Never"){
-        LogInformation("tagNever")
+    elseif ($ShutDownTag -eq $TagNeverValue){
+        Write-Information -MessageToLog "tagNever"
     }
     else {
-        # In this case, the tag must be containing a timestamp, we validated if this value is in the correct format
+        # In this case, the tag must be containing a timestamp, we validate if this value is in the correct format
         try{
-            $ShutdownTime = [DateTime]::ParseExact($ShutDownTag,'ddd, dd MMM yyyy HH:mm:ss GMT',$null)   
+            $ShutdownTime = [DateTime]::ParseExact($ShutDownTag,"${ValidTimeStampFormat} GMT",$null)   
         }
         catch [System.FormatException]
         {
-            LogInformation("tagInvalid")
+            Write-Information -MessageToLog "tagInvalid"
             return
         }
         $CurrentTime = (Get-Date).ToUniversalTime()
         if ($CurrentTime -gt $ShutdownTime){
             # If the shutdown time in the tag has reached/passed, force stop the VM
-            Stop-AzVM -Name $VM.Name -ResourceGroupName $VM.ResourceGroupName -Confirm:$False -Force
-            LogInformation("readyForShutdown")
-            $LastShutDownTime = $CurrentTime.ToString('ddd, dd MMM yyyy HH:mm:ss') + " GMT"
-            SetLastAutoshutdownEventTag($LastShutDownTime)
+            Stop-AzVM -Name "$VMName" -ResourceGroupName "$ResourceGroup" -Confirm:$False -Force
+            Write-Information -MessageToLog "readyForShutdown"
+            $LastShutDownTime = $CurrentTime.ToString($ValidTimeStampFormat) + " GMT"
+            Set-LastAutoshutdownEventTag -LastShutDownTime $LastShutDownTime
 
             # Prepare tag for next runs
-            if ($NumberOfHoursBeforeShutdown -eq "Never"){
+            if ($NumberOfHoursBeforeShutdown -eq $TagNeverValue){
                 # If the default choice for auto-shutdown was 'Never', set tag accordingly
-                SetShutDownTag("never")
+                Set-ShutDownTag -TagValue $TagNeverValue
             }
             else{
                 # Else, set it to a phrase that relates to shutdown by app
-                SetShutDownTag("change_me_on_boot")
+                Set-ShutDownTag -TagValue "change_me_on_boot"
             }
             return
         }
         else{
             # If shutdown time has not been reached, log the same information
-            LogInformation("tooEarlyToShutdown")
+            Write-Information -MessageToLog "tooEarlyToShutdown"
             return
         } 
     }
