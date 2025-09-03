@@ -36,7 +36,7 @@ if ($NumberOfHoursBeforeShutdown -eq 'Never') {
     $NumberOfHoursBeforeShutdown = $TagNeverValue
 }
 
-$VMName = ${env:INSTANCE_NAME}
+$VMName = "matlab-vm"
 
 # Retrieve VM information, contains information about instance tags, instance ID
 $VM = Get-AzVM -Name "$VMName" -ResourceGroupName "$ResourceGroup"
