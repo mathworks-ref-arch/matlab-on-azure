@@ -27,16 +27,23 @@ $UserDefinedShutdownTag = "user-managed-shutdown"
 $TagNeverValue = 'never'
 $ValidTimeStampFormat = 'ddd, dd MMM yyyy HH:mm:ss'
 
+# Default MATLAB VM name
+$DefaultVMName = 'matlab-vm'
+
 # The required parameters are fed in from the ARM template as environment variables
 $ResourceGroup = ${env:RESOURCE_GROUP_NAME}
 $NumberOfHoursBeforeShutdown = ${env:HOURS_BEFORE_SHUTDOWN}
 
-# Normalize variable
-if ($NumberOfHoursBeforeShutdown -eq 'Never') {
-    $NumberOfHoursBeforeShutdown = $TagNeverValue
-}
+# Uniquely identify the MATLAB VM name
+$VMName = if([string]::IsNullOrEmpty(${env:INSTANCE_NAME})) { "${DefaultVMName}" } else { ${env:INSTANCE_NAME} }
 
-$VMName = "matlab-vm"
+# List of stopped/stopping/deallocating states
+$StoppedStates = @(
+    "VM deallocated",
+    "VM stopped",
+    "VM stopping",
+    "VM deallocating"
+)
 
 # Retrieve VM information, contains information about instance tags, instance ID
 $VM = Get-AzVM -Name "$VMName" -ResourceGroupName "$ResourceGroup"
@@ -110,18 +117,10 @@ function Set-LastAutoshutdownEventTag {
 
 # Check if the instance is stopped
 function IsInstanceStopped {
-    # List of stopped/stopping/deallocating states
-    $stoppedStates = @(
-        "VM deallocated",
-        "VM stopped",
-        "VM stopping",
-        "VM deallocating"
-    )
-
     # Find the PowerState status
     $PowerStateStatus = $VMInstanceView.Statuses | Where-Object { $_.Code -like "*PowerState*" } | Select-Object -First 1
 
-    if ($PowerStateStatus -and $PowerStateStatus.DisplayStatus -in $stoppedStates) {
+    if ($PowerStateStatus -and $PowerStateStatus.DisplayStatus -in $StoppedStates) {
         return $true
     }
     return $false
