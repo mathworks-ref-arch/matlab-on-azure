@@ -1,8 +1,8 @@
 # Copyright 2025 The MathWorks, Inc.
 
-// Use this Packer configuration file to build a managed image with R2025a MATLAB installed.
+// Use this Packer configuration file to build a managed image with R2025b MATLAB installed.
 // For more information on these variables, see /packer/v1/build-azure-matlab.pkr.hcl.
-RELEASE = "R2025a"
+RELEASE = "R2025b"
 STARTUP_SCRIPTS = [
     ".env",
     "10_setup-machine.sh",

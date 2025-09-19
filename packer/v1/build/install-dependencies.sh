@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2023-2024 The MathWorks, Inc.
+# Copyright 2023-2025 The MathWorks, Inc.
 
 # Exit on any failure, treat unset substitution variables as errors
 set -euo pipefail
@@ -17,7 +17,7 @@ sudo apt-get -qq install gcc jq make unzip wget
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 # Install pip
-curl https://bootstrap.pypa.io/get-pip.py | sudo python3
+sudo apt-get install -y python3-pip
 
 # Install NVIDIA CUDA Toolkit
 if [[ -n "${NVIDIA_CUDA_TOOLKIT}" ]]; then

@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024 The MathWorks, Inc.
+# Copyright 2024-2025 The MathWorks, Inc.
 
 # Exit on any failure, treat unset substitution variables as errors
 set -euo pipefail
@@ -18,9 +18,9 @@ function install_matlab_proxy(){
     # Install matlab-proxy in a global location that persists after the build completes
     sudo mkdir -p $DESTINATION
     if [ -z "${MATLAB_PROXY_VERSION}" ]; then
-        sudo python3 -m pip install matlab-proxy --target $DESTINATION/python-package
+        sudo python3 -m pip install matlab-proxy --target $DESTINATION/python-package --use-pep517
     else
-        sudo python3 -m pip install matlab-proxy==${MATLAB_PROXY_VERSION} --target $DESTINATION/python-package
+        sudo python3 -m pip install matlab-proxy==${MATLAB_PROXY_VERSION} --target $DESTINATION/python-package --use-pep517
     fi
     echo "Installed matlab-proxy"
 }

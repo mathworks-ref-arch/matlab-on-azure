@@ -16,7 +16,7 @@ packer {
 
 variable "PRODUCTS" {
   type        = string
-  default     = "5G_Toolbox AUTOSAR_Blockset Aerospace_Blockset Aerospace_Toolbox Antenna_Toolbox Audio_Toolbox Automated_Driving_Toolbox Bioinformatics_Toolbox Bluetooth_Toolbox C2000_Microcontroller_Blockset Communications_Toolbox Computer_Vision_Toolbox Control_System_Toolbox Curve_Fitting_Toolbox DDS_Blockset DSP_HDL_Toolbox DSP_System_Toolbox Database_Toolbox Datafeed_Toolbox Deep_Learning_HDL_Toolbox Deep_Learning_Toolbox Econometrics_Toolbox Embedded_Coder Filter_Design_HDL_Coder Financial_Instruments_Toolbox Financial_Toolbox Fixed-Point_Designer Fuzzy_Logic_Toolbox GPU_Coder Global_Optimization_Toolbox HDL_Coder HDL_Verifier Image_Acquisition_Toolbox Image_Processing_Toolbox Industrial_Communication_Toolbox Instrument_Control_Toolbox LTE_Toolbox Lidar_Toolbox MATLAB MATLAB_Coder MATLAB_Compiler MATLAB_Compiler_SDK MATLAB_Production_Server MATLAB_Report_Generator MATLAB_Test MATLAB_Web_App_Server Mapping_Toolbox Medical_Imaging_Toolbox Mixed-Signal_Blockset Model_Predictive_Control_Toolbox Motor_Control_Blockset Navigation_Toolbox Optimization_Toolbox Parallel_Computing_Toolbox Partial_Differential_Equation_Toolbox Phased_Array_System_Toolbox Powertrain_Blockset Predictive_Maintenance_Toolbox RF_Blockset RF_PCB_Toolbox RF_Toolbox ROS_Toolbox Radar_Toolbox Reinforcement_Learning_Toolbox Requirements_Toolbox Risk_Management_Toolbox Robotics_System_Toolbox Robust_Control_Toolbox Satellite_Communications_Toolbox Sensor_Fusion_and_Tracking_Toolbox SerDes_Toolbox Signal_Integrity_Toolbox Signal_Processing_Toolbox SimBiology SimEvents Simscape Simscape_Battery Simscape_Driveline Simscape_Electrical Simscape_Fluids Simscape_Multibody Simulink Simulink_3D_Animation Simulink_Check Simulink_Coder Simulink_Compiler Simulink_Control_Design Simulink_Coverage Simulink_Design_Optimization Simulink_Design_Verifier Simulink_Desktop_Real-Time Simulink_Fault_Analyzer Simulink_PLC_Coder Simulink_Real-Time Simulink_Report_Generator Simulink_Test SoC_Blockset Stateflow Statistics_and_Machine_Learning_Toolbox Symbolic_Math_Toolbox System_Composer System_Identification_Toolbox Text_Analytics_Toolbox UAV_Toolbox Vehicle_Dynamics_Blockset Vehicle_Network_Toolbox Vision_HDL_Toolbox WLAN_Toolbox Wavelet_Toolbox Wireless_HDL_Toolbox Wireless_Testbench"
+  default     = "5G_Toolbox AUTOSAR_Blockset Aerospace_Blockset Aerospace_Toolbox Antenna_Toolbox Audio_Toolbox Automated_Driving_Toolbox Bioinformatics_Toolbox Bluetooth_Toolbox C2000_Microcontroller_Blockset Communications_Toolbox Computer_Vision_Toolbox Control_System_Toolbox Curve_Fitting_Toolbox DDS_Blockset DSP_HDL_Toolbox DSP_System_Toolbox Database_Toolbox Datafeed_Toolbox Deep_Learning_HDL_Toolbox Deep_Learning_Toolbox Econometrics_Toolbox Embedded_Coder Filter_Design_HDL_Coder Financial_Instruments_Toolbox Financial_Toolbox Fixed-Point_Designer Fuzzy_Logic_Toolbox GPU_Coder Global_Optimization_Toolbox HDL_Coder HDL_Verifier Image_Acquisition_Toolbox Image_Processing_Toolbox Industrial_Communication_Toolbox Instrument_Control_Toolbox LTE_Toolbox Lidar_Toolbox MATLAB MATLAB_Coder MATLAB_Compiler MATLAB_Compiler_SDK MATLAB_Report_Generator MATLAB_Test Mapping_Toolbox Medical_Imaging_Toolbox Mixed-Signal_Blockset Model_Predictive_Control_Toolbox Motor_Control_Blockset Navigation_Toolbox Optimization_Toolbox Parallel_Computing_Toolbox Partial_Differential_Equation_Toolbox Phased_Array_System_Toolbox Powertrain_Blockset Predictive_Maintenance_Toolbox RF_Blockset RF_PCB_Toolbox RF_Toolbox ROS_Toolbox Radar_Toolbox Reinforcement_Learning_Toolbox Requirements_Toolbox Risk_Management_Toolbox Robotics_System_Toolbox Robust_Control_Toolbox Satellite_Communications_Toolbox Sensor_Fusion_and_Tracking_Toolbox SerDes_Toolbox Signal_Integrity_Toolbox Signal_Processing_Toolbox SimBiology SimEvents Simscape Simscape_Battery Simscape_Driveline Simscape_Electrical Simscape_Fluids Simscape_Multibody Simulink Simulink_3D_Animation Simulink_Check Simulink_Coder Simulink_Compiler Simulink_Control_Design Simulink_Coverage Simulink_Design_Optimization Simulink_Design_Verifier Simulink_Desktop_Real-Time Simulink_Fault_Analyzer Simulink_PLC_Coder Simulink_Real-Time Simulink_Report_Generator Simulink_Test SoC_Blockset Stateflow Statistics_and_Machine_Learning_Toolbox Symbolic_Math_Toolbox System_Composer System_Identification_Toolbox Text_Analytics_Toolbox UAV_Toolbox Vehicle_Dynamics_Blockset Vehicle_Network_Toolbox Vision_HDL_Toolbox WLAN_Toolbox Wavelet_Toolbox Wireless_HDL_Toolbox Wireless_Testbench"
   description = "Target products to install in the machine image, e.g. MATLAB Simulink."
 }
 
@@ -28,7 +28,7 @@ variable "SPKGS" {
 
 variable "RELEASE" {
   type        = string
-  default     = "R2024b"
+  default     = "R2025b"
   description = "Target MATLAB release to install in the machine image, must start with \"R\"."
 
   validation {
@@ -57,7 +57,7 @@ variable "RUNTIME_SCRIPTS" {
 
 variable "DCV_INSTALLER_URL" {
   type        = string
-  default     = "https://d1uj6qtbmh3dt5.cloudfront.net/2023.0/Servers/nice-dcv-2023.0-15065-ubuntu2204-x86_64.tgz"
+  default     = "https://d1uj6qtbmh3dt5.cloudfront.net/2024.0/Servers/nice-dcv-2024.0-19030-ubuntu2204-x86_64.tgz"
   description = "The URL to install NICE DCV, a remote display protocol to use."
 }
 
@@ -69,7 +69,7 @@ variable "MATLAB_PROXY_VERSION" {
 
 variable "NVIDIA_DRIVER_VERSION" {
   type        = string
-  default     = "535"
+  default     = "535-server"
   description = "The version of target NVIDIA Driver to install."
 }
 
@@ -181,6 +181,44 @@ variable "AZURE_KEY_VAULT" {
   sensitive   = true
 }
 
+# Optional networking configuration for the Packer Builder VM
+variable "VIRTUAL_NETWORK_NAME" {
+  type        = string
+  default     = ""
+  description = "(Optional) The name of the virtual network to use for the Packer builder VM."
+}
+
+variable "SUBNET_NAME" {
+  type        = string
+  default     = ""
+  description = "(Optional) The name of the subnet within the virtual network to use for the Packer builder VM."
+}
+
+variable "VIRTUAL_NETWORK_RESOURCE_GROUP" {
+  type        = string
+  default     = ""
+  description = "(Optional) Name of the resource group containing the virtual network to use for the Packer builder VM."
+}
+
+# Optional SSH Bastion host configuration
+variable "SSH_BASTION_HOST" {
+  type        = string
+  default     = ""
+  description = "(Optional) A bastion host to use for the actual SSH connection."
+}
+
+variable "SSH_BASTION_USERNAME" {
+  type        = string
+  default     = ""
+  description = "(Optional) The username to use when connecting to the bastion host via SSH."
+}
+
+variable "SSH_BASTION_PASSWORD" {
+  type        = string
+  default     = ""
+  description = "(Optional) The password to use when connecting to the bastion host via SSH."
+}
+
 # Set up local variables used by provisioners.
 locals {
   image_uuid      = uuidv4()
@@ -192,6 +230,22 @@ locals {
 
 # Configure the AZURE instance that is used to build the machine image.
 source "azure-arm" "Image_Builder" {
+  communicator                        = "ssh"
+  ssh_username                        = "ubuntu"
+
+  # Optional configuration for SSH Bastion Host setup
+  ssh_bastion_host                    = "${var.SSH_BASTION_HOST}"
+  ssh_bastion_username                = "${var.SSH_BASTION_USERNAME}"
+  ssh_bastion_password                = "${var.SSH_BASTION_PASSWORD}"
+
+  # Optional networking setup for the Packer Builder VM
+  virtual_network_name                = "${var.VIRTUAL_NETWORK_NAME}"
+  virtual_network_resource_group_name = "${var.VIRTUAL_NETWORK_RESOURCE_GROUP}"
+  virtual_network_subnet_name         = "${var.SUBNET_NAME}"
+
+  # Assigning a Public IP to the Packer Builder VM for internet connectivity
+  private_virtual_network_with_public_ip = "true"
+  
   client_id                         = "${var.CLIENT_ID}"
   client_secret                     = "${var.CLIENT_SECRET}"
   managed_image_resource_group_name = "${var.RESOURCE_GROUP_NAME}"
@@ -216,7 +270,7 @@ build {
   provisioner "shell" {
     inline = ["/usr/bin/cloud-init status --wait"]
   }
-
+  
   provisioner "shell" {
     inline = ["mkdir /tmp/startup"]
   }
