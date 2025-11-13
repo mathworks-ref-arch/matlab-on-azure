@@ -13,7 +13,7 @@
       "type": "string",
       "defaultValue": "",
       "metadata": {
-        "description": "The IP address range that can be used to access the VM. This must be a valid IP CIDR range of the form x.x.x.x/x. Use the value &lt;your_public_ip_address&gt;/32 to restrict access to only your computer."
+        "description": "Comma-separated list of IPv4 address ranges that will be allowed to connect to the MATLAB VM. Each IP CIDR must have the format <ip_address>/<mask>. The mask determines the number of IP addresses to include. A mask of 32 specifies a single IP address. Examples of allowed values: 10.0.0.1/32 or 10.0.0.0/16,192.34.56.78/32. To build a specific range, you can use this tool: https://www.ipaddressguide.com/cidr. To determine which address is appropriate, contact your IT administrator."
       }
     },
     "adminUsername": {
@@ -168,7 +168,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2025b-vm-linux-sku",
-    "version": "20252.0.25091500",
+    "version": "20252.1.25110928",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
@@ -228,7 +228,7 @@
             "name": "default-allow-ssh",
             "properties": {
               "priority": 1000,
-              "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
               "protocol": "Tcp",
               "destinationPortRange": "22",
               "access": "Allow",
@@ -241,7 +241,7 @@
             "name": "default-allow-rdp",
             "properties": {
               "priority": 1001,
-              "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
               "protocol": "Tcp",
               "destinationPortRange": "3389",
               "access": "Allow",
@@ -254,7 +254,7 @@
             "name": "allow-nice-dcv",
             "properties": {
               "priority": 1002,
-              "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
               "protocol": "Tcp",
               "destinationPortRange": "8443",
               "access": "Allow",
@@ -267,7 +267,7 @@
             "name": "allow-matlab-proxy",
             "properties": {
               "priority": 1003,
-              "sourceAddressPrefix": "[parameters('clientIPAddresses')]",
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
               "protocol": "Tcp",
               "destinationPortRange": "8123",
               "access": "Allow",

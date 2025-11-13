@@ -69,7 +69,7 @@ variable "MATLAB_PROXY_VERSION" {
 
 variable "NVIDIA_DRIVER_VERSION" {
   type        = string
-  default     = "535-server"
+  default     = "580"
   description = "The version of target NVIDIA Driver to install."
 }
 
@@ -151,13 +151,13 @@ variable "IMAGE_PUBLISHER" {
 
 variable "IMAGE_OFFER" {
   type        = string
-  default     = "0001-com-ubuntu-server-jammy"
+  default     = "ubuntu-24_04-lts"
   description = "The offer of the base image used for customization."
 }
 
 variable "IMAGE_SKU" {
   type        = string
-  default     = "22_04-lts"
+  default     = "server-gen1"
   description = "Version of the base image used for customization."
 }
 
