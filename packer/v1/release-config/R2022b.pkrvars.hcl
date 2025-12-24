@@ -41,3 +41,4 @@ IMAGE_PUBLISHER         = "Canonical"
 IMAGE_OFFER             = "0001-com-ubuntu-server-jammy"
 IMAGE_SKU               = "22_04-lts"
 VM_SIZE                 = "Standard_NC4as_T4_v3"
+

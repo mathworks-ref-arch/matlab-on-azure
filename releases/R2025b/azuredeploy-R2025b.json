@@ -30,6 +30,20 @@
         "description": "Choose the password for the admin username. You need this password to log in remotely to the instance.  If you enabled the setting to access MATLAB in a browser, you need to enter this password as an authentication token. Your password must meet the [Azure password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)."
       }
     },
+    "virtualNetworkResourceID": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "(Optional) The Resource ID of an existing virtual network to deploy your VM into. You can find this under the Properties of your virtual network. If left empty, a new virtual network with a default subnet will be created."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "(Optional) The name of an existing subnet within your chosen virtual network to deploy your VM into. Required if a Virtual Network Resource ID is specified."
+      }
+    },
     "autoShutdown": {
       "defaultValue": "Never",
       "type": "string",
@@ -122,13 +136,13 @@
     ],
     "subnetPrefix": "10.0.0.0/24",
     "adminUsername": "[parameters('adminUsername')]",
-    "newOrExistingVirtualNetwork": "New",
+    "newOrExistingVirtualNetwork": "[if(empty(replace(parameters('virtualNetworkResourceID'),' ','')),'new','existing')]",
     "virtualNetworkCreateName": "[concat(variables('prefix'), '-vnet')]",
     "subnetCreateName": "[concat(variables('prefix'), '-subnet')]",
-    "virtualNetworkName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),last(split(parameters('virtualNetworkResourceID'),'/')),variables('virtualNetworkCreateName'))]",
-    "subnetName": "[if(equals(variables('newOrExistingVirtualNetwork'),'Existing'),parameters('subnetName'),variables('subnetCreateName'))]",
+    "virtualNetworkName": "[if(equals(variables('newOrExistingVirtualNetwork'),'existing'),last(split(parameters('virtualNetworkResourceID'),'/')),variables('virtualNetworkCreateName'))]",
+    "subnetName": "[if(equals(variables('newOrExistingVirtualNetwork'),'existing'),parameters('subnetName'),variables('subnetCreateName'))]",
     "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
-    "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'New'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
+    "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'new'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
     "location": "[resourceGroup().location]",
     "userDataScript": [
       "#!/usr/bin/env bash",
@@ -168,7 +182,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2025b-vm-linux-sku",
-    "version": "20252.1.25110928",
+    "version": "20252.2.25120853",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
@@ -214,7 +228,7 @@
           }
         ]
       },
-      "condition": "[or(equals(variables('newOrExistingVirtualNetwork'),'New'),equals(variables('newOrExistingVirtualNetwork'),'new'))]"
+      "condition": "[equals(variables('newOrExistingVirtualNetwork'),'new')]"
     },
     {
       "name": "[variables('networkSecurityGroupName')]",

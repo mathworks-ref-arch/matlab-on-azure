@@ -3,7 +3,7 @@
 packer {
   required_plugins {
     azure = {
-      source = "github.com/hashicorp/azure"
+      source  = "github.com/hashicorp/azure"
       version = "~> 2"
     }
   }
@@ -32,7 +32,7 @@ variable "RELEASE" {
   description = "Target MATLAB release to install in the machine image, must start with \"R\"."
 
   validation {
-    condition     = can(regex("^R20[0-9][0-9](a|b)(U[0-9])?$", var.RELEASE))
+    condition     = can(regex("^R20[0-9][0-9](a|b)$", var.RELEASE))
     error_message = "The RELEASE value must be a valid MATLAB release, starting with \"R\"."
   }
 }
@@ -83,6 +83,12 @@ variable "NVIDIA_CUDA_KEYRING_URL" {
   type        = string
   default     = "https://developer.download.nvidia.com/compute/cuda/repos/ubuntu2204/x86_64/cuda-keyring_1.0-1_all.deb"
   description = "NVIDIA CUDA keyring url."
+}
+
+variable "MSA_URL" {
+  type        = string
+  description = "URL pointing to a valid MATLAB Startup Accelerator file. If left unset, a default URL will be constructed based on the RELEASE variable."
+  default     = null
 }
 
 variable "MATLAB_SOURCE_LOCATION" {
@@ -226,17 +232,21 @@ locals {
   build_scripts   = [for s in var.BUILD_SCRIPTS : format("build/%s", s)]
   startup_scripts = [for s in var.STARTUP_SCRIPTS : format("startup/%s", s)]
   runtime_scripts = [for s in var.RUNTIME_SCRIPTS : format("runtime/%s", s)]
+  # This local variable decides which URL to use.
+  # If var.MSA_URL is not null (meaning the user provided an override), use that value.
+  # Otherwise, construct the URL using var.RELEASE.
+  effective_msa_url = var.MSA_URL != null ? var.MSA_URL : "https://raw.githubusercontent.com/mathworks-ref-arch/iac-building-blocks/refs/heads/main/common/artifacts/msa/${var.RELEASE}/Linux/msa.ini"
 }
 
 # Configure the AZURE instance that is used to build the machine image.
 source "azure-arm" "Image_Builder" {
-  communicator                        = "ssh"
-  ssh_username                        = "ubuntu"
+  communicator = "ssh"
+  ssh_username = "ubuntu"
 
   # Optional configuration for SSH Bastion Host setup
-  ssh_bastion_host                    = "${var.SSH_BASTION_HOST}"
-  ssh_bastion_username                = "${var.SSH_BASTION_USERNAME}"
-  ssh_bastion_password                = "${var.SSH_BASTION_PASSWORD}"
+  ssh_bastion_host     = "${var.SSH_BASTION_HOST}"
+  ssh_bastion_username = "${var.SSH_BASTION_USERNAME}"
+  ssh_bastion_password = "${var.SSH_BASTION_PASSWORD}"
 
   # Optional networking setup for the Packer Builder VM
   virtual_network_name                = "${var.VIRTUAL_NETWORK_NAME}"
@@ -245,7 +255,7 @@ source "azure-arm" "Image_Builder" {
 
   # Assigning a Public IP to the Packer Builder VM for internet connectivity
   private_virtual_network_with_public_ip = "true"
-  
+
   client_id                         = "${var.CLIENT_ID}"
   client_secret                     = "${var.CLIENT_SECRET}"
   managed_image_resource_group_name = "${var.RESOURCE_GROUP_NAME}"
@@ -270,7 +280,7 @@ build {
   provisioner "shell" {
     inline = ["/usr/bin/cloud-init status --wait"]
   }
-  
+
   provisioner "shell" {
     inline = ["mkdir /tmp/startup"]
   }
@@ -303,6 +313,7 @@ build {
       "MATLAB_SOURCE_LOCATION=${var.MATLAB_SOURCE_LOCATION}",
       "SPKG_SOURCE_LOCATION=${var.SPKG_SOURCE_LOCATION}",
       "AZURE_KEY_VAULT=${var.AZURE_KEY_VAULT}",
+      "MSA_URL=${local.effective_msa_url}",
       "MATLAB_ROOT=/usr/local/matlab"
     ]
     expect_disconnect = true
