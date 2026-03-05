@@ -9,6 +9,17 @@
         "description": "The Azure instance type to use for the VM. For a list of instance types, see [Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
       }
     },
+    "createPublicIPAddress": {
+      "type": "string",
+      "defaultValue": "Yes",
+      "allowedValues": [
+        "Yes",
+        "No"
+      ],
+      "metadata": {
+        "description": "Choose whether to attach a public IP address to the MATLAB VM. For details about using a private network configuration, see [Configure Private Network](#configure-private-network)."
+      }
+    },
     "clientIPAddresses": {
       "type": "string",
       "defaultValue": "",
@@ -42,6 +53,20 @@
       "defaultValue": "",
       "metadata": {
         "description": "(Optional) The name of an existing subnet within your chosen virtual network to deploy your VM into. Required if a Virtual Network Resource ID is specified."
+      }
+    },
+    "newVnetAddressSpace": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "(Optional) Address space to use for the new Virtual Network that the template creates, effective only if not using an existing virtual network."
+      }
+    },
+    "newSubnetAddressSpace": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "(Optional) Address space of the default subnet in the new Virtual Network that the template creates, effective only if not using an existing virtual network. This address range must be a subset of the address space defined for the new Virtual Network."
       }
     },
     "autoShutdown": {
@@ -100,18 +125,18 @@
         "No"
       ]
     },
+    "matlabLicenseServer": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Optional License Manager Server for MATLAB, specified as a string in the form <port>@<license-manager-hostname> or <port>@<license-manager-ip-address> (for example: 27000@netlm-server or 27000@10.0.0.4). Ensure that the MATLAB VM can reach or resolve the license manager's IP or hostname. If you do not provide this string, MATLAB uses online licensing. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure)."
+      }
+    },
     "niceDcvLicenseServer": {
       "defaultValue": "",
       "type": "String",
       "metadata": {
         "description": "If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license."
-      }
-    },
-    "matlabLicenseServer": {
-      "defaultValue": "",
-      "type": "String",
-      "metadata": {
-        "description": "Optional License Manager for MATLAB, specified as a string in the form port@hostname. If you do not provide this string, MATLAB uses online licensing. If you provide this string, ensure that the license manager is accessible from the specified virtual network and subnets. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure)."
       }
     },
     "optionalUserCommand": {
@@ -132,9 +157,10 @@
   "variables": {
     "prefix": "matlab",
     "addressPrefix": [
-      "10.0.0.0/16"
+      "[parameters('newVnetAddressSpace')]"
     ],
-    "subnetPrefix": "10.0.0.0/24",
+    "subnetPrefix": "[parameters('newSubnetAddressSpace')]",
+    "allowDefaultOutboundInternetAccess": true,
     "adminUsername": "[parameters('adminUsername')]",
     "newOrExistingVirtualNetwork": "[if(empty(replace(parameters('virtualNetworkResourceID'),' ','')),'new','existing')]",
     "virtualNetworkCreateName": "[concat(variables('prefix'), '-vnet')]",
@@ -182,7 +208,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2025b-vm-linux-sku",
-    "version": "20252.2.25120853",
+    "version": "20252.4.26030741",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
@@ -206,12 +232,38 @@
     "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
     "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
     "roleName": "[concat('customroleforfunctionapp',uniqueString(resourceGroup().name))]",
-    "roleDefinitionId": "[guid(subscription().subscriptionId,variables('roleName'))]"
+    "roleDefinitionId": "[guid(subscription().subscriptionId,variables('roleName'))]",
+    "enablePublicIp": "[equals(parameters('createPublicIPAddress'), 'Yes')]",
+    "nicIpConfigurationWithPublicIp": [
+      {
+        "name": "nic1IpConfig",
+        "properties": {
+          "subnet": {
+            "id": "[variables('subnetId')]"
+          },
+          "privateIPAllocationMethod": "Dynamic",
+          "publicIpAddress": {
+            "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIP'))]"
+          }
+        }
+      }
+    ],
+    "nicIpConfigurationWithoutPublicIp": [
+      {
+        "name": "nic1IpConfig",
+        "properties": {
+          "subnet": {
+            "id": "[variables('subnetId')]"
+          },
+          "privateIPAllocationMethod": "Dynamic"
+        }
+      }
+    ]
   },
   "resources": [
     {
       "type": "Microsoft.Network/virtualNetworks",
-      "apiVersion": "2023-06-01",
+      "apiVersion": "2024-07-01",
       "name": "[variables('virtualNetworkName')]",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
@@ -223,6 +275,7 @@
           {
             "name": "[variables('subnetCreateName')]",
             "properties": {
+              "defaultOutboundAccess": "[variables('allowDefaultOutboundInternetAccess')]",
               "addressPrefix": "[variables('subnetPrefix')]"
             }
           }
@@ -296,10 +349,11 @@
     {
       "name": "[variables('publicIp')]",
       "type": "Microsoft.Network/publicIPAddresses",
+      "condition": "[variables('enablePublicIp')]",
       "sku": {
         "name": "Standard"
       },
-      "apiVersion": "2023-06-01",
+      "apiVersion": "2024-07-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "properties": {
@@ -317,23 +371,11 @@
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "dependsOn": [
-        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIp'))]"
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIp'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
       ],
       "properties": {
-        "ipConfigurations": [
-          {
-            "name": "nic1IpConfig",
-            "properties": {
-              "subnet": {
-                "id": "[variables('subnetId')]"
-              },
-              "privateIPAllocationMethod": "Dynamic",
-              "publicIPAddress": {
-                "id": "[resourceId('Microsoft.Network/publicIPAddresses', variables('publicIp'))]"
-              }
-            }
-          }
-        ],
+        "ipConfigurations": "[if(variables('enablePublicIp'), variables('nicIpConfigurationWithPublicIp'), variables('nicIpConfigurationWithoutPublicIp'))]",
         "networkSecurityGroup": {
           "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
         }
@@ -341,7 +383,7 @@
     },
     {
       "type": "Microsoft.Compute/virtualMachines",
-      "apiVersion": "2023-09-01",
+      "apiVersion": "2025-04-01",
       "location": "[variables('location')]",
       "tags": "[variables('tagsForAll')]",
       "name": "[variables('vmName')]",
@@ -388,7 +430,7 @@
           "name": "startup",
           "type": "extensions",
           "location": "[variables('location')]",
-          "apiVersion": "2023-09-01",
+          "apiVersion": "2025-04-01",
           "dependsOn": [
             "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
           ],
@@ -567,16 +609,16 @@
     "NICE DCV Connection": {
       "type": "String",
       "condition": "[equals(parameters('accessProtocol'), 'NICE DCV')]",
-      "value": "[concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8443/#console')]"
+      "value": "[if(variables('enablePublicIp'), concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8443/#console'), concat('https://', reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress, ':8443/#console'))]"
     },
     "RDP Connection": {
       "type": "String",
-      "value": "[reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn]"
+      "value": "[if(variables('enablePublicIp'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn, reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress)]"
     },
     "BrowserConnection": {
       "type": "String",
       "condition": "[equals(parameters('enableMatlabProxy'), 'Yes')]",
-      "value": "[concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8123')]"
+      "value": "[if(variables('enablePublicIp'), concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8123'), concat('https://', reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress, ':8123'))]"
     }
   }
 }

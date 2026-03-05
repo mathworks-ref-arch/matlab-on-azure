@@ -18,9 +18,9 @@ function install_matlab_proxy(){
     # Install matlab-proxy in a global location that persists after the build completes
     sudo mkdir -p $DESTINATION
     if [ -z "${MATLAB_PROXY_VERSION}" ]; then
-        sudo python3 -m pip install matlab-proxy --target $DESTINATION/python-package --break-system-packages
+        sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install matlab-proxy --target $DESTINATION/python-package
     else
-        sudo python3 -m pip install matlab-proxy==${MATLAB_PROXY_VERSION} --target $DESTINATION/python-package --break-system-packages
+        sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install matlab-proxy==${MATLAB_PROXY_VERSION} --target $DESTINATION/python-package
     fi
     echo "Installed matlab-proxy"
 }
