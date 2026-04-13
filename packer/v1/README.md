@@ -10,7 +10,7 @@ For more information about templates, see [Packer Templates](https://www.packer.
 
 ## **Requirements**
 Before starting, you need:
-* [Packer](https://www.packer.io/downloads) 1.7.1 or later.
+* [Packer](https://www.packer.io/downloads) 1.15.0 or later.
 * [Azure credentials](https://learn.microsoft.com/en-us/azure/virtual-machines/linux/build-image-with-packer#create-azure-credentials). For details about how Packer authenticates Azure clients, see [Azure authentication for Packer](https://www.packer.io/plugins/builders/azure#authentication).
 
 ## **Costs**

@@ -23,23 +23,14 @@ see [Build and Deploy Your Own Machine Image](#build-and-deploy-your-own-machine
 
 To view instructions for deploying the MATLAB reference architecture, select a MATLAB release:
 
-| Linux | Windows |
-| ----- | ------- |
-| [R2025b](releases/R2025b/README.md) | [R2025b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025b/README.md) |
-| [R2025a](releases/R2025a/README.md) | [R2025a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025a/README.md) |
-| [R2024b](releases/R2024b/README.md) | [R2024b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024b/README.md) |
-| [R2024a](releases/R2024a/README.md) | [R2024a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024a/README.md) |
-| [R2023b](releases/R2023b/README.md) | [R2023b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2023b/README.md) |
-| [R2023a](releases/R2023a/README.md) | [R2023a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2023a/README.md) |
-| [R2022b](releases/R2022b/README.md) | [R2022b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2022b/README.md) |
-| [R2022a](releases/R2022a/README.md) | [R2022a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2022a/README.md) |
-| [R2021b](releases/R2021b/README.md) | [R2021b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2021b/README.md) |
-| [R2021a](releases/R2021a/README.md) | [R2021a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2021a/README.md) |
-| [R2020b](releases/R2020b/README.md) | [R2020b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2020b/README.md) |
-| [R2020a](releases/R2020a/README.md) |  |
-| [R2019b](releases/R2019b/README.md) |  |
-| [R2019a\_and\_older](releases/R2019a_and_older/README.md) |  |
-
+| Linux | Windows | Status |
+| ----- | ------- | ------- |
+| [R2026a](releases/R2026a/README.md) | [R2026a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2026a/README.md) | ✅ Prebuilt available. |
+| [R2025b](releases/R2025b/README.md) | [R2025b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025b/README.md) | ✅ Prebuilt available. |
+| [R2025a](releases/R2025a/README.md) | [R2025a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025a/README.md) | ✅ Prebuilt available. |
+| [R2024b](releases/R2024b/README.md) | [R2024b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024b/README.md) | ⚠️ Prebuilt will be removed in March 2027. |
+| [R2024a](releases/R2024a/README.md) | [R2024a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024a/README.md) | ⚠️ Prebuilt will be removed in September 2026. |
+| [Earlier/Custom](./packer/v1) | [Earlier/Custom](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/packer/v1) | For earlier MATLAB releases, you must build your own machine image. |
 
 The above instructions allow you to launch instances based on the latest prebuilt MathWorks marketplace images.
 MathWorks periodically replaces older machine images with new images.
@@ -51,7 +42,12 @@ For details of the scripts which form the basis of the MathWorks Linux reference
 see [Build Your Own Machine Image](./packer/v1).
 You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure,
 which you can deploy with the MathWorks infrastructure as code (IaC) templates.
-To launch the built image, see [Deploy Your Own Machine Image](releases/R2025b/README.md#deploy-your-own-machine-image).
+To launch the built image, see [Deploy Your Own Machine Image](releases/R2026a/README.md#deploy-your-own-machine-image).
+
+You can customize the MATLAB release which is installed as part of this custom build.
+This includes MATLAB releases supported by the prebuilt images, as well as earlier MATLAB releases.
+For more details,
+see [Customize MATLAB Release to Install](./packer/v1#customize-matlab-release-to-install).
 
 # Learn about Architecture
 Deploying this reference architecture will create several resources in your resource group.
@@ -111,6 +107,6 @@ To request assistance or additional features, contact [MathWorks Technical Suppo
 
 ----
 
-Copyright 2018-2025 The MathWorks, Inc.
+Copyright 2018-2026 The MathWorks, Inc.
 
 ----

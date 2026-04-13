@@ -1,0 +1,624 @@
+{
+  "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+  "contentVersion": "1.0.0.0",
+  "parameters": {
+    "vmSize": {
+      "type": "string",
+      "defaultValue": "Standard_D3_v2",
+      "metadata": {
+        "description": "The Azure instance type to use for the VM. For a list of instance types, see [Sizes for virtual machines in Azure](https://docs.microsoft.com/en-us/azure/virtual-machines/sizes)."
+      }
+    },
+    "createPublicIPAddress": {
+      "type": "string",
+      "defaultValue": "Yes",
+      "allowedValues": [
+        "Yes",
+        "No"
+      ],
+      "metadata": {
+        "description": "Choose whether to attach a public IP address to the MATLAB VM. For details about using a private network configuration, see [Configure Private Network](#configure-private-network)."
+      }
+    },
+    "clientIPAddresses": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Comma-separated list of IPv4 address ranges that will be allowed to connect to the MATLAB VM. Each IP CIDR must have the format <ip_address>/<mask>. The mask determines the number of IP addresses to include. A mask of 32 specifies a single IP address. Examples of allowed values: 10.0.0.1/32 or 10.0.0.0/16,192.34.56.78/32. To build a specific range, you can use this tool: https://www.ipaddressguide.com/cidr. To determine which address is appropriate, contact your IT administrator."
+      }
+    },
+    "adminUsername": {
+      "type": "string",
+      "defaultValue": "ubuntu",
+      "metadata": {
+        "description": "Admin username for the VM running MATLAB. To avoid any deployment errors, check the list of [disallowed values](https://docs.microsoft.com/en-us/rest/api/compute/virtual-machines/create-or-update?tabs=HTTP#osprofile) for adminUsername."
+      }
+    },
+    "adminPassword": {
+      "type": "securestring",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Choose the password for the admin username. You need this password to log in remotely to the instance.  If you enabled the setting to access MATLAB in a browser, you need to enter this password as an authentication token. Your password must meet the [Azure password requirements](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/faq#what-are-the-password-requirements-when-creating-a-vm-)."
+      }
+    },
+    "virtualNetworkResourceID": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "(Optional) The Resource ID of an existing virtual network to deploy your VM into. You can find this under the Properties of your virtual network. If left empty, a new virtual network with a default subnet will be created."
+      }
+    },
+    "subnetName": {
+      "type": "string",
+      "defaultValue": "",
+      "metadata": {
+        "description": "(Optional) The name of an existing subnet within your chosen virtual network to deploy your VM into. Required if a Virtual Network Resource ID is specified."
+      }
+    },
+    "newVnetAddressSpace": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/16",
+      "metadata": {
+        "description": "(Optional) Address space to use for the new Virtual Network that the template creates, effective only if not using an existing virtual network."
+      }
+    },
+    "newSubnetAddressSpace": {
+      "type": "string",
+      "defaultValue": "10.0.0.0/24",
+      "metadata": {
+        "description": "(Optional) Address space of the default subnet in the new Virtual Network that the template creates, effective only if not using an existing virtual network. This address range must be a subset of the address space defined for the new Virtual Network."
+      }
+    },
+    "autoShutdown": {
+      "defaultValue": "Never",
+      "type": "string",
+      "allowedValues": [
+        "Never",
+        "After 1 hour",
+        "After 2 hours",
+        "After 3 hours",
+        "After 4 hours",
+        "After 5 hours",
+        "After 6 hours",
+        "After 7 hours",
+        "After 8 hours",
+        "After 9 hours",
+        "After 10 hours",
+        "After 11 hours",
+        "After 12 hours",
+        "After 13 hours",
+        "After 14 hours",
+        "After 15 hours",
+        "After 16 hours",
+        "After 17 hours",
+        "After 18 hours",
+        "After 19 hours",
+        "After 20 hours",
+        "After 21 hours",
+        "After 22 hours",
+        "After 23 hours",
+        "After 24 hours"
+      ],
+      "metadata": {
+        "description": "Select the duration after which the VM should be automatically shut down post launch."
+      }
+    },
+    "accessProtocol": {
+      "type": "string",
+      "metadata": {
+        "description": "Access protocol to connect to this VM. Selecting 'NICE DCV' will enable [NICE DCV](https://aws.amazon.com/hpc/dcv/) using a 30-days demo license (unless a production license is provided). You can access the desktop on a browser using the NICE DCV connection URL in the Outputs section of the deployment page once the resource group is successfully deployed. By using NICE DCV, you agree to the terms and conditions outlined in [NICE DCV End User License Agreement](https://www.nice-dcv.com/eula.html). If you select 'RDP', NICE DCV will not be enabled, and you can connect to this VM using a RDP connection."
+      },
+      "defaultValue": "RDP",
+      "allowedValues": [
+        "RDP",
+        "NICE DCV"
+      ]
+    },
+    "enableMatlabProxy": {
+      "type": "string",
+      "metadata": {
+        "description": "Use this setting to access MATLAB in a browser on your cloud instance. Note that the MATLAB session in your browser is different from one you start from the desktop in your Remote Desktop Protocol (RDP) or NICE DCV session."
+      },
+      "defaultValue": "Yes",
+      "allowedValues": [
+        "Yes",
+        "No"
+      ]
+    },
+    "matlabLicenseServer": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Optional License Manager Server for MATLAB, specified as a string in the form <port>@<license-manager-hostname> or <port>@<license-manager-ip-address> (for example: 27000@netlm-server or 27000@10.0.0.4). Ensure that the MATLAB VM can reach or resolve the license manager's IP or hostname. If you do not provide this string, MATLAB uses online licensing. For more information, see [Network License Manager for MATLAB on Microsoft Azure](https://github.com/mathworks-ref-arch/license-manager-for-matlab-on-azure)."
+      }
+    },
+    "niceDcvLicenseServer": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "If you have selected NICE DCV as the remote access protocol and have a production license, use this optional parameter to specify the NICE DCV license server's port and hostname (or IP address) in the form of port@hostname. This field must be left blank if you have opted to use RDP or want to use NICE DCV with a demo license."
+      }
+    },
+    "optionalUserCommand": {
+      "defaultValue": "",
+      "type": "String",
+      "metadata": {
+        "description": "Provide an optional inline shell command to run on machine launch. For example, to set an environment variable CLOUD=AZURE, use this command excluding the angle brackets: &lt;echo -e \"export CLOUD=AZURE\" &#124; sudo tee -a /etc/profile.d/setenvvar.sh && source /etc/profile&gt;. To run an external script, use this command excluding the angle brackets: &lt;wget -O /tmp/my-script.sh \"https://example.com/script.sh\" && bash /tmp/my-script.sh&gt;. Find the logs at '/var/log/mathworks/startup.log'."
+      }
+    },
+    "imageID": {
+      "type": "String",
+      "defaultValue": "",
+      "metadata": {
+        "description": "Optional Resource ID of a custom managed image in the target region. To use a prebuilt MathWorks image instead, leave this field empty. If you customize the build, for example by removing or modifying the included scripts, this can make the image incompatible with the provided ARM template. To ensure compatibility, modify the ARM template or image accordingly."
+      }
+    }
+  },
+  "variables": {
+    "prefix": "matlab",
+    "addressPrefix": [
+      "[parameters('newVnetAddressSpace')]"
+    ],
+    "subnetPrefix": "[parameters('newSubnetAddressSpace')]",
+    "allowDefaultOutboundInternetAccess": true,
+    "adminUsername": "[parameters('adminUsername')]",
+    "newOrExistingVirtualNetwork": "[if(empty(replace(parameters('virtualNetworkResourceID'),' ','')),'new','existing')]",
+    "virtualNetworkCreateName": "[concat(variables('prefix'), '-vnet')]",
+    "subnetCreateName": "[concat(variables('prefix'), '-subnet')]",
+    "virtualNetworkName": "[if(equals(variables('newOrExistingVirtualNetwork'),'existing'),last(split(parameters('virtualNetworkResourceID'),'/')),variables('virtualNetworkCreateName'))]",
+    "subnetName": "[if(equals(variables('newOrExistingVirtualNetwork'),'existing'),parameters('subnetName'),variables('subnetCreateName'))]",
+    "subnetRef": "[resourceId('Microsoft.Network/virtualNetworks/subnets', variables('virtualNetworkName'), variables('subnetName'))]",
+    "subnetId": "[if(equals(variables('newOrExistingVirtualNetwork'),'new'),variables('subnetRef'),concat(parameters('virtualNetworkResourceID'), '/subnets/', parameters('subnetName')))]",
+    "location": "[resourceGroup().location]",
+    "userDataScript": [
+      "#!/usr/bin/env bash",
+      "# Copyright 2023 The MathWorks, Inc.",
+      "",
+      "STARTUP_FOLDER=/opt/mathworks/startup",
+      "# Load startup variables",
+      "if [[ -r ${STARTUP_FOLDER}/.env ]]; then",
+      "    set -o allexport",
+      "    source ${STARTUP_FOLDER}/.env",
+      "    set +o allexport",
+      "fi",
+      "",
+      "# Define startup parameters",
+      "[concat('export MLM_LICENSE_FILE=', parameters('matlabLicenseServer'))]",
+      "[concat('export ACCESS_PROTOCOL=', '''', parameters('accessProtocol'), '''')]",
+      "[concat('export ENABLE_MATLAB_PROXY=', '''', parameters('enableMatlabProxy'), '''')]",
+      "[concat('export USERNAME=', parameters('adminUsername'))]",
+      "[concat('export PASSWORD=', base64(parameters('adminPassword')))]",
+      "[concat('export NICE_DCV_LICENSE_SERVER=', parameters('niceDcvLicenseServer'))]",
+      "[concat('export OPTIONAL_USER_COMMAND=', '''', parameters('optionalUserCommand'), '''')]",
+      "",
+      "# Run startup scripts",
+      "mkdir -p /var/log/mathworks",
+      "run-parts --verbose --exit-on-error --regex '^[0-9]+_.+$' ${STARTUP_FOLDER} >> /var/log/mathworks/startup.log 2>&1"
+    ],
+    "networkSecurityGroupName": "[concat(variables('prefix'), '-rdp-nsg')]",
+    "publicIp": "[concat(variables('prefix'), '-publicIP')]",
+    "domainNameLabel": "[concat(variables('prefix'), '-azure-', uniqueString(resourceGroup().id))]",
+    "nicName": "[concat(variables('prefix'), '-nic')]",
+    "vmName": "[concat(variables('prefix'), '-vm')]",
+    "hostName": "matlabvm",
+    "providerID": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
+    "tagsForAll": {
+      "provider": "[variables('providerID')]"
+    },
+    "publisher": "mathworks-inc",
+    "offer": "matlab-ref-arch-18a-v1-linux-disk",
+    "sku": "matlab-ref-arch-r2026a-vm-linux-sku",
+    "version": "20261.0.26040713",
+    "imageReference": {
+      "publisher": "[variables('publisher')]",
+      "offer": "[variables('offer')]",
+      "sku": "[variables('sku')]",
+      "version": "[variables('version')]"
+    },
+    "plan": {
+      "name": "[variables('sku')]",
+      "publisher": "[variables('publisher')]",
+      "product": "[variables('offer')]"
+    },
+    "imageResourceID": {
+      "id": "[parameters('imageID')]"
+    },
+    "functionAppName": "[concat('mw-autoshutdownapp', uniqueString(resourceGroup().id))]",
+    "runtimeStack": "powershell",
+    "storageAccountName": "[concat('appstorage', uniquestring(resourceGroup().id))]",
+    "repoUrl": "https://github.com/mathworks-ref-arch/matlab-on-azure.git",
+    "branch": "master",
+    "functionappDirectory": "function-apps/",
+    "appInsightsName": "[concat('mw-appinsights',uniqueString(resourceGroup().id))]",
+    "appInsightsWorkspace": "[concat('mw-appworkspace',uniqueString(resourceGroup().id))]",
+    "roleName": "[concat('customroleforfunctionapp',uniqueString(resourceGroup().name))]",
+    "roleDefinitionId": "[guid(subscription().subscriptionId,variables('roleName'))]",
+    "enablePublicIp": "[equals(parameters('createPublicIPAddress'), 'Yes')]",
+    "nicIpConfigurationWithPublicIp": [
+      {
+        "name": "nic1IpConfig",
+        "properties": {
+          "subnet": {
+            "id": "[variables('subnetId')]"
+          },
+          "privateIPAllocationMethod": "Dynamic",
+          "publicIpAddress": {
+            "id": "[resourceId('Microsoft.Network/publicIpAddresses', variables('publicIP'))]"
+          }
+        }
+      }
+    ],
+    "nicIpConfigurationWithoutPublicIp": [
+      {
+        "name": "nic1IpConfig",
+        "properties": {
+          "subnet": {
+            "id": "[variables('subnetId')]"
+          },
+          "privateIPAllocationMethod": "Dynamic"
+        }
+      }
+    ]
+  },
+  "resources": [
+    {
+      "type": "Microsoft.Network/virtualNetworks",
+      "apiVersion": "2024-07-01",
+      "name": "[variables('virtualNetworkName')]",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "addressSpace": {
+          "addressPrefixes": "[variables('addressPrefix')]"
+        },
+        "subnets": [
+          {
+            "name": "[variables('subnetCreateName')]",
+            "properties": {
+              "defaultOutboundAccess": "[variables('allowDefaultOutboundInternetAccess')]",
+              "addressPrefix": "[variables('subnetPrefix')]"
+            }
+          }
+        ]
+      },
+      "condition": "[equals(variables('newOrExistingVirtualNetwork'),'new')]"
+    },
+    {
+      "name": "[variables('networkSecurityGroupName')]",
+      "type": "Microsoft.Network/networkSecurityGroups",
+      "apiVersion": "2023-06-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "securityRules": [
+          {
+            "name": "default-allow-ssh",
+            "properties": {
+              "priority": 1000,
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "22",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "default-allow-rdp",
+            "properties": {
+              "priority": 1001,
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "3389",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allow-nice-dcv",
+            "properties": {
+              "priority": 1002,
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "8443",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          },
+          {
+            "name": "allow-matlab-proxy",
+            "properties": {
+              "priority": 1003,
+              "sourceAddressPrefixes": "[split(replace(parameters('clientIPAddresses'),' ', ''), ',')]",
+              "protocol": "Tcp",
+              "destinationPortRange": "8123",
+              "access": "Allow",
+              "direction": "Inbound",
+              "sourcePortRange": "*",
+              "destinationAddressPrefix": "*"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "name": "[variables('publicIp')]",
+      "type": "Microsoft.Network/publicIPAddresses",
+      "condition": "[variables('enablePublicIp')]",
+      "sku": {
+        "name": "Standard"
+      },
+      "apiVersion": "2024-07-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "properties": {
+        "publicIPAllocationMethod": "Static",
+        "dnsSettings": {
+          "domainNameLabel": "[variables('domainNameLabel')]"
+        },
+        "idleTimeoutInMinutes": 20
+      }
+    },
+    {
+      "name": "[variables('nicName')]",
+      "type": "Microsoft.Network/networkInterfaces",
+      "apiVersion": "2023-06-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/publicIPAddresses/', variables('publicIp'))]",
+        "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+      ],
+      "properties": {
+        "ipConfigurations": "[if(variables('enablePublicIp'), variables('nicIpConfigurationWithPublicIp'), variables('nicIpConfigurationWithoutPublicIp'))]",
+        "networkSecurityGroup": {
+          "id": "[resourceId('Microsoft.Network/networkSecurityGroups', variables('networkSecurityGroupName'))]"
+        }
+      }
+    },
+    {
+      "type": "Microsoft.Compute/virtualMachines",
+      "apiVersion": "2025-04-01",
+      "location": "[variables('location')]",
+      "tags": "[variables('tagsForAll')]",
+      "name": "[variables('vmName')]",
+      "plan": "[if(empty(parameters('imageId')), variables('plan') , null())]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+      ],
+      "properties": {
+        "hardwareProfile": {
+          "VmSize": "[parameters('vmSize')]"
+        },
+        "storageProfile": {
+          "imageReference": "[if(empty(parameters('imageId')), variables('imageReference'), variables('imageResourceID'))]",
+          "osDisk": {
+            "createOption": "FromImage",
+            "managedDisk": {
+              "storageAccountType": "Standard_LRS"
+            }
+          }
+        },
+        "osProfile": {
+          "computerName": "[variables('hostName')]",
+          "adminUsername": "[variables('AdminUsername')]",
+          "adminPassword": "[parameters('adminPassword')]",
+          "linuxConfiguration": {
+            "disablePasswordAuthentication": false
+          }
+        },
+        "networkProfile": {
+          "networkInterfaces": [
+            {
+              "id": "[resourceId('Microsoft.Network/networkInterfaces/', variables('nicName'))]"
+            }
+          ]
+        },
+        "diagnosticsProfile": {
+          "bootDiagnostics": {
+            "enabled": false
+          }
+        }
+      },
+      "resources": [
+        {
+          "name": "startup",
+          "type": "extensions",
+          "location": "[variables('location')]",
+          "apiVersion": "2025-04-01",
+          "dependsOn": [
+            "[resourceId('Microsoft.Compute/virtualMachines/', variables('vmName'))]"
+          ],
+          "tags": {
+            "displayName": "startup"
+          },
+          "properties": {
+            "publisher": "Microsoft.Azure.Extensions",
+            "type": "CustomScript",
+            "typeHandlerVersion": "2.1",
+            "autoUpgradeMinorVersion": true,
+            "settings": {
+              "skipDos2Unix": false
+            },
+            "protectedSettings": {
+              "script": "[base64(join(variables('userDataScript'), '\n'))]"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Resources/deployments",
+      "name": "pid-cac3e06f-bd25-4b54-bb42-85f14829ea44-partnercenter",
+      "apiVersion": "2023-07-01",
+      "properties": {
+        "mode": "Incremental",
+        "template": {
+          "$schema": "https://schema.management.azure.com/schemas/2019-04-01/deploymentTemplate.json#",
+          "contentVersion": "1.0.0.0",
+          "resources": []
+        }
+      }
+    },
+    {
+      "name": "[variables('functionAppName')]",
+      "type": "Microsoft.Web/sites",
+      "apiVersion": "2023-01-01",
+      "location": "[variables('location')]",
+      "kind": "functionapp",
+      "identity": {
+        "type": "SystemAssigned"
+      },
+      "dependsOn": [
+        "[resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName'))]",
+        "[resourceId('Microsoft.Insights/components',variables('appinsightsName'))]"
+      ],
+      "properties": {
+        "siteConfig": {
+          "appSettings": [
+            {
+              "name": "FUNCTIONS_WORKER_RUNTIME",
+              "value": "[variables('runtimeStack')]"
+            },
+            {
+              "name": "APPINSIGHTS_INSTRUMENTATIONKEY",
+              "value": "[reference(resourceId('microsoft.insights/components/', variables('appinsightsName')), '2020-02-02').InstrumentationKey]"
+            },
+            {
+              "name": "AzureWebJobsStorage",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=',variables('storageAccountName'),';AccountKey=',listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2023-04-01').keys[0].value)]"
+            },
+            {
+              "name": "FUNCTIONS_EXTENSION_VERSION",
+              "value": "~4"
+            },
+            {
+              "name": "WEBSITE_CONTENTAZUREFILECONNECTIONSTRING",
+              "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')),'2023-04-01').keys[0].value)]"
+            },
+            {
+              "name": "PROJECT",
+              "value": "[variables('functionappDirectory')]"
+            },
+            {
+              "name": "RESOURCE_GROUP_NAME",
+              "value": "[resourceGroup().name]"
+            },
+            {
+              "name": "HOURS_BEFORE_SHUTDOWN",
+              "value": "[parameters('autoShutdown')]"
+            },
+            {
+              "name": "INSTANCE_NAME",
+              "value": "[variables('vmName')]"
+            }
+          ]
+        }
+      },
+      "resources": [
+        {
+          "apiVersion": "2023-01-01",
+          "name": "web",
+          "type": "sourcecontrols",
+          "dependsOn": [
+            "[resourceId('Microsoft.Web/Sites/', variables('functionAppName'))]"
+          ],
+          "properties": {
+            "RepoUrl": "[variables('repoURL')]",
+            "branch": "[variables('branch')]",
+            "IsManualIntegration": true,
+            "isGitHubAction": false
+          }
+        }
+      ]
+    },
+    {
+      "type": "Microsoft.Authorization/roleDefinitions",
+      "apiVersion": "2022-04-01",
+      "name": "[variables('roleDefinitionId')]",
+      "properties": {
+        "roleName": "[variables('roleName')]",
+        "description": "Lets the function app read information about the VM, update tags and deallocate it",
+        "assignableScopes": [
+          "[resourceGroup().id]"
+        ],
+        "permissions": [
+          {
+            "actions": [
+              "Microsoft.DevTestLab/schedules/read",
+              "Microsoft.Resources/subscriptions/resourceGroups/read",
+              "Microsoft.Compute/virtualMachines/read",
+              "Microsoft.Compute/virtualMachines/write",
+              "Microsoft.Compute/virtualMachines/deallocate/action",
+              "Microsoft.Compute/virtualMachines/instanceView/read"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "type": "Microsoft.Authorization/roleAssignments",
+      "apiVersion": "2022-04-01",
+      "name": "[guid(resourceGroup().id)]",
+      "dependsOn": [
+        "[resourceId('Microsoft.Web/sites/', variables('functionAppName'))]",
+        "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]"
+      ],
+      "properties": {
+        "roleDefinitionId": "[resourceId('Microsoft.Authorization/roleDefinitions', variables('roleDefinitionId'))]",
+        "principalType": "ServicePrincipal",
+        "principalId": "[reference(resourceId('Microsoft.Web/sites/', variables('functionAppName')), '2023-01-01', 'Full').identity.principalId]",
+        "scope": "[resourceGroup().id]"
+      }
+    },
+    {
+      "type": "Microsoft.Storage/storageAccounts",
+      "apiVersion": "2022-09-01",
+      "name": "[variables('storageAccountName')]",
+      "kind": "StorageV2",
+      "location": "[variables('location')]",
+      "sku": {
+        "name": "Standard_LRS"
+      }
+    },
+    {
+      "name": "[variables('appInsightsWorkspace')]",
+      "apiVersion": "2022-10-01",
+      "type": "Microsoft.OperationalInsights/workspaces",
+      "location": "[variables('location')]"
+    },
+    {
+      "name": "[variables('appinsightsName')]",
+      "apiVersion": "2020-02-02",
+      "type": "Microsoft.Insights/components",
+      "location": "[variables('location')]",
+      "dependsOn": [
+        "[variables('appInsightsWorkspace')]"
+      ],
+      "properties": {
+        "WorkspaceResourceId": "[resourceId('Microsoft.OperationalInsights/workspaces',variables('appInsightsWorkspace'))]"
+      }
+    }
+  ],
+  "outputs": {
+    "NICE DCV Connection": {
+      "type": "String",
+      "condition": "[equals(parameters('accessProtocol'), 'NICE DCV')]",
+      "value": "[if(variables('enablePublicIp'), concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8443/#console'), concat('https://', reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress, ':8443/#console'))]"
+    },
+    "RDP Connection": {
+      "type": "String",
+      "value": "[if(variables('enablePublicIp'), reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn, reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress)]"
+    },
+    "BrowserConnection": {
+      "type": "String",
+      "condition": "[equals(parameters('enableMatlabProxy'), 'Yes')]",
+      "value": "[if(variables('enablePublicIp'), concat('https://',reference(resourceId('Microsoft.Network/publicIPAddresses', variables('publicIP'))).dnsSettings.fqdn,':8123'), concat('https://', reference(variables('nicName'), '2024-05-01').ipConfigurations[0].properties.privateIPAddress, ':8123'))]"
+    }
+  }
+}
