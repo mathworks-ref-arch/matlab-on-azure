@@ -208,7 +208,7 @@
     "publisher": "mathworks-inc",
     "offer": "matlab-ref-arch-18a-v1-linux-disk",
     "sku": "matlab-ref-arch-r2025b-vm-linux-sku",
-    "version": "20252.4.26030741",
+    "version": "20252.6.26071324",
     "imageReference": {
       "publisher": "[variables('publisher')]",
       "offer": "[variables('offer')]",
