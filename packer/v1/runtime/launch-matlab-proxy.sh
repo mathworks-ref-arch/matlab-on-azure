@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024 The MathWorks, Inc.
+# Copyright 2024-2026 The MathWorks, Inc.
 
 set -x
 echo "Starting matlab-proxy-app"
@@ -12,6 +12,13 @@ function setup_matlab_proxy_env(){
     export MWI_APP_PORT='8123'
     export MWI_ENABLE_SSL='true'
     export MWI_ENABLE_TOKEN_AUTH='true'
+
+    # Source DDUX context tags (systemd does not source /etc/profile.d/)
+    if [[ -r /etc/profile.d/mw_context_tag.sh ]]; then
+        source /etc/profile.d/mw_context_tag.sh
+    fi
+    export MW_CONTEXT_TAGS=${MW_CONTEXT_TAGS:-MATLAB:AZURE:V1}
+    export MW_DDUX_FORCE_ENABLE=true
     log_location="/home/${USER}/.MathWorks/matlab-proxy"
     mkdir -p "${log_location}" 
     touch "${log_location}/matlab-proxy.log"

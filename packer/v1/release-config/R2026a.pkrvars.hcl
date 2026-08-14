@@ -13,7 +13,8 @@ STARTUP_SCRIPTS = [
   "60_setup-matlab.sh",
   "80_warmup-matlab.sh",
   "85_warmup-mathworks-service-host.sh",
-  "90_run-optional-user-command.sh"
+  "90_run-optional-user-command.sh",
+  "99_enable-auto-upgrades.sh"
 ]
 RUNTIME_SCRIPTS = [
   "swap-desktop-solution.sh",

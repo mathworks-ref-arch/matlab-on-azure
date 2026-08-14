@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2023-2025 The MathWorks, Inc.
+# Copyright 2023-2026 The MathWorks, Inc.
 
 # Exit on any failure, treat unset substitution variables as errors
 set -euo pipefail
@@ -132,7 +132,20 @@ sudo systemctl daemon-reload
 export DEBCONF_NONINTERACTIVE_SEEN=true
 sudo apt-get -qq update
 sudo apt-get -qq upgrade
-sudo apt-get -qq -o=Dpkg::Use-Pty=0 install ubuntu-mate-desktop
+# Redirect stdout to a log file: ubuntu-mate-desktop pulls hundreds of
+# packages and the streamed dpkg/maintainer-script output has been
+# overwhelming the GitHub Actions runner mid-install. Stderr stays on
+# the console so real errors surface; on failure we dump the log tail.
+MATE_LOG=/var/tmp/install-ubuntu-mate-desktop.log
+echo "Installing ubuntu-mate-desktop (stdout -> ${MATE_LOG}, stderr stays visible)..."
+EXIT_CODE=0
+sudo apt-get -qq -o=Dpkg::Use-Pty=0 install ubuntu-mate-desktop >"${MATE_LOG}" || EXIT_CODE=$?
+if [ "${EXIT_CODE}" -ne 0 ]; then
+    echo "ubuntu-mate-desktop install failed (rc=${EXIT_CODE}); last 200 lines of ${MATE_LOG}:" >&2
+    tail -n 200 "${MATE_LOG}" >&2 || true
+    exit "${EXIT_CODE}"
+fi
+echo "ubuntu-mate-desktop installed; full log at ${MATE_LOG}"
 sudo apt-get -qq install \
     xserver-xorg-video-dummy \
     xfonts-cyrillic \
@@ -190,6 +203,7 @@ sudo sed -i 's/^Prompt=.*/Prompt=never/' /etc/update-manager/release-upgrades
 echo "Downloading nice dcv zip"
 sudo wget --no-verbose "${DCV_INSTALLER_URL}"
 sudo tar xvf nice-dcv-*.tgz -C /usr/local/bin/
+sudo rm nice-dcv-*.tgz
 
 sudo sed -i 's/enabled=1/enabled=0/' /etc/default/apport
 

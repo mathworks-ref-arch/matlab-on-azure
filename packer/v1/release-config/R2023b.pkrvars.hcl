@@ -1,4 +1,4 @@
-# Copyright 2023-2025 The MathWorks, Inc.
+# Copyright 2023-2026 The MathWorks, Inc.
 
 // Use this Packer configuration file to build a VHD with R2023b MATLAB installed.
 // For more information on these variables, see /packer/v1/build-azure-matlab.pkr.hcl.
@@ -13,7 +13,8 @@ STARTUP_SCRIPTS = [
   "60_setup-matlab.sh",
   "80_warmup-matlab.sh",
   "85_warmup-mathworks-service-host.sh",
-  "90_run-optional-user-command.sh"
+  "90_run-optional-user-command.sh",
+  "99_enable-auto-upgrades.sh"
 ]
 RUNTIME_SCRIPTS = [
   "swap-desktop-solution.sh",
