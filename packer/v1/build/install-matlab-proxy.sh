@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 #
-# Copyright 2024-2025 The MathWorks, Inc.
+# Copyright 2024-2026 The MathWorks, Inc.
 
 # Exit on any failure, treat unset substitution variables as errors
 set -euo pipefail
@@ -17,10 +17,14 @@ function install_matlab_proxy_dependencies(){
 function install_matlab_proxy(){
     # Install matlab-proxy in a global location that persists after the build completes
     sudo mkdir -p $DESTINATION
-    if [ -z "${MATLAB_PROXY_VERSION}" ]; then
+    # "latest" installs the newest release; any other value is treated as an exact
+    # version to pin. An empty or unset value is not accepted (set -u makes an unset
+    # value fail here, and the Packer variable validation rejects an empty string),
+    # which keeps the behavior in line with the MATLAB_PROXY_VERSION error message.
+    if [[ "${MATLAB_PROXY_VERSION}" == "latest" ]]; then
         sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install matlab-proxy --target $DESTINATION/python-package
     else
-        sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install matlab-proxy==${MATLAB_PROXY_VERSION} --target $DESTINATION/python-package
+        sudo PIP_BREAK_SYSTEM_PACKAGES=1 python3 -m pip install matlab-proxy=="${MATLAB_PROXY_VERSION}" --target $DESTINATION/python-package
     fi
     echo "Installed matlab-proxy"
 }

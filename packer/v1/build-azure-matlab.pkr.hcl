@@ -39,7 +39,7 @@ variable "RELEASE" {
 
 variable "BUILD_SCRIPTS" {
   type        = list(string)
-  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-proxy.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "install-support-packages.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
+  default     = ["install-startup-scripts.sh", "install-swap-desktop-solution.sh", "install-dependencies.sh", "install-matlab-proxy.sh", "install-matlab-dependencies-ubuntu.sh", "install-ubuntu-desktop.sh", "setup-mate.sh", "install-matlab.sh", "install-jre.sh", "install-support-packages.sh", "setup-startup-accelerator.sh", "install-fabric-manager-ubuntu.sh"]
   description = "The list of installation scripts Packer will use when building the image."
 }
 
@@ -63,8 +63,12 @@ variable "DCV_INSTALLER_URL" {
 
 variable "MATLAB_PROXY_VERSION" {
   type        = string
-  default     = ""
-  description = "The version of matlab-proxy to install. Installs the latest version by default."
+  default     = "latest"
+  description = "Version of matlab-proxy to install. Use 'latest' to install the newest version available on PyPI, or pin to a specific version (e.g. '0.10.0')."
+  validation {
+    condition     = length(var.MATLAB_PROXY_VERSION) > 0
+    error_message = "MATLAB_PROXY_VERSION must not be empty. Use a version string or 'latest'."
+  }
 }
 
 variable "NVIDIA_DRIVER_VERSION" {

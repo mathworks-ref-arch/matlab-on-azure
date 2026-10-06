@@ -29,6 +29,7 @@ BUILD_SCRIPTS = [
   "install-ubuntu-desktop.sh",
   "setup-mate.sh",
   "install-matlab.sh",
+  "install-jre.sh",
   "install-support-packages.sh",
   "setup-startup-accelerator.sh",
   "install-fabric-manager-ubuntu.sh"
@@ -43,3 +44,4 @@ IMAGE_PUBLISHER         = "Canonical"
 IMAGE_OFFER             = "ubuntu-24_04-lts"
 IMAGE_SKU               = "server-gen1"
 VM_SIZE                 = "Standard_NC4as_T4_v3"
+MATLAB_PROXY_VERSION    = "latest"

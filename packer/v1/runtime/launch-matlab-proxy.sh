@@ -12,6 +12,7 @@ function setup_matlab_proxy_env(){
     export MWI_APP_PORT='8123'
     export MWI_ENABLE_SSL='true'
     export MWI_ENABLE_TOKEN_AUTH='true'
+    export MWI_PROCESS_START_TIMEOUT='300'
 
     # Source DDUX context tags (systemd does not source /etc/profile.d/)
     if [[ -r /etc/profile.d/mw_context_tag.sh ]]; then
@@ -19,13 +20,16 @@ function setup_matlab_proxy_env(){
     fi
     export MW_CONTEXT_TAGS=${MW_CONTEXT_TAGS:-MATLAB:AZURE:V1}
     export MW_DDUX_FORCE_ENABLE=true
-    log_location="/home/${USER}/.MathWorks/matlab-proxy"
-    mkdir -p "${log_location}" 
-    touch "${log_location}/matlab-proxy.log"
-    export MWI_LOG_FILE="${log_location}/matlab-proxy.log"
-    export MWI_MATLAB_STARTUP_SCRIPT="cd /home/${USER}/"
-    # The MWI_AUTH_TOKEN variable declared below is set by line 15 of the 50_setup-matlab-proxy.sh script in the startup folder. The script sets this variable to specify the authentication token for matlab-proxy. 
-    # Do not uncomment or modify this variable declaration. 
+    # Write the matlab-proxy log to the common MathWorks log location.
+    export MWI_LOG_FILE="/var/log/mathworks/matlab-proxy.log"
+
+    # Start MATLAB in the user's Documents folder.
+    MATLAB_STARTUP_FOLDER="/home/${USER}/Documents"
+    mkdir -p "${MATLAB_STARTUP_FOLDER}"
+    export MWI_MATLAB_STARTUP_SCRIPT="cd ${MATLAB_STARTUP_FOLDER}"
+
+    # The MWI_AUTH_TOKEN variable declared below is set by line 15 of the 50_setup-matlab-proxy.sh script in the startup folder. The script sets this variable to specify the authentication token for matlab-proxy.
+    # Do not uncomment or modify this variable declaration.
     # export MWI_AUTH_TOKEN=
 }
 

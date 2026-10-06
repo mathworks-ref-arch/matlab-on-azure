@@ -25,11 +25,11 @@ To view instructions for deploying the MATLAB reference architecture, select a M
 
 | Linux | Windows | Status |
 | ----- | ------- | ------- |
+| [R2026b](releases/R2026b/README.md) | [R2026b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2026b/README.md) | ✅ Prebuilt available. |
 | [R2026a](releases/R2026a/README.md) | [R2026a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2026a/README.md) | ✅ Prebuilt available. |
 | [R2025b](releases/R2025b/README.md) | [R2025b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025b/README.md) | ✅ Prebuilt available. |
-| [R2025a](releases/R2025a/README.md) | [R2025a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025a/README.md) | ✅ Prebuilt available. |
+| [R2025a](releases/R2025a/README.md) | [R2025a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2025a/README.md) | ⚠️ Prebuilt will be removed in September 2027. |
 | [R2024b](releases/R2024b/README.md) | [R2024b](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024b/README.md) | ⚠️ Prebuilt will be removed in March 2027. |
-| [R2024a](releases/R2024a/README.md) | [R2024a](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/releases/R2024a/README.md) | ⚠️ Prebuilt will be removed in September 2026. |
 | [Earlier/Custom](./packer/v1) | [Earlier/Custom](https://github.com/mathworks-ref-arch/matlab-on-azure-win/tree/master/packer/v1) | For earlier MATLAB releases, you must build your own machine image. |
 
 The above instructions allow you to launch instances based on the latest prebuilt MathWorks marketplace images.
@@ -42,7 +42,7 @@ For details of the scripts which form the basis of the MathWorks Linux reference
 see [Build Your Own Machine Image](./packer/v1).
 You can use these scripts to build your own custom Linux machine image for running MATLAB on Azure,
 which you can deploy with the MathWorks infrastructure as code (IaC) templates.
-To launch the built image, see [Deploy Your Own Machine Image](releases/R2026a/README.md#deploy-your-own-machine-image).
+To launch the built image, see [Deploy Your Own Machine Image](releases/R2026b/README.md#deploy-your-own-machine-image).
 
 You can customize the MATLAB release which is installed as part of this custom build.
 This includes MATLAB releases supported by the prebuilt images, as well as earlier MATLAB releases.
