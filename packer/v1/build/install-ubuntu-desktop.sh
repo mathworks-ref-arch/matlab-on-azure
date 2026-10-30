@@ -210,4 +210,6 @@ sudo sed -i 's/enabled=1/enabled=0/' /etc/default/apport
 # Disable rdp for now, will be started if chosen by user
 sudo systemctl disable xrdp
 
+# Refuse new SSH connections until the reboot, so the next connection reaches the restarted machine.
+sudo iptables -I INPUT -p tcp --dport 22 --syn -j REJECT --reject-with tcp-reset
 sudo reboot

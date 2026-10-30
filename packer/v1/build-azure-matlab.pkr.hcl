@@ -328,7 +328,9 @@ build {
       "MATLAB_ROOT=/usr/local/matlab"
     ]
     expect_disconnect = true
-    scripts           = "${local.build_scripts}"
+    # Time for the machine to come back after the reboot in install-ubuntu-desktop.sh.
+    start_retry_timeout = "10m"
+    scripts             = "${local.build_scripts}"
   }
 
   provisioner "shell" {
